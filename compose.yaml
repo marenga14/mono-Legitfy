@@ -1,0 +1,48 @@
+# /opt/legitfy/compose.yaml
+# nginx in /opt/proxy reaches the API as "legitfy" on the shared "web" network, so this publishes no
+# ports. Postgres stays on the internal network, with no route to nginx.
+services:
+  legitfy:
+    build: ./api
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    env_file: app.env
+    environment:
+      TRUST_PROXY: "true"
+      DATABASE_URL: postgres://legitfy:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@legitfy-db:5432/legitfy
+    depends_on:
+      legitfy-db:
+        condition: service_healthy
+    volumes:
+      - legitfy-files:/data
+    networks:
+      - web
+      - internal
+
+  legitfy-db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    stop_grace_period: 60s
+    environment:
+      POSTGRES_USER: legitfy
+      POSTGRES_DB: legitfy
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U legitfy -d legitfy"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - legitfy-db:/var/lib/postgresql/data
+    networks:
+      - internal
+
+volumes:
+  legitfy-files:
+  legitfy-db:
+
+networks:
+  internal:
+  web:
+    external: true
