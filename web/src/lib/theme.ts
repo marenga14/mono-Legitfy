@@ -13,10 +13,10 @@ function saved(): Theme | null {
 }
 
 /** One choice for the whole product, dark until someone picks otherwise. */
-export const theme = ref<Theme>("dark");
+export const theme = ref<Theme>("light");
 
 export function applyTheme() {
-  theme.value = saved() ?? "dark";
+  theme.value = saved() ?? "light";
   document.documentElement.dataset.theme = theme.value;
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme.value === "dark" ? "#0a0930" : "#f5f4fd");
 }
