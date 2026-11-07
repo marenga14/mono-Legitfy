@@ -44,6 +44,7 @@ const year = new Date().getFullYear();
         <h2 class="text-base tracking-normal!">{{ t("footer.contact") }}</h2>
         <address class="mt-3 space-y-2 not-italic text-ink-soft">
           <a class="block hover:text-ink hover:underline" :href="`mailto:${supportEmail}`">{{ supportEmail }}</a>
+          <a class="block hover:text-ink hover:underline" href="https://x.com/LegitifyHQ" target="_blank" rel="noopener">@LegitifyHQ</a>
           <p>{{ t("footer.hq") }}<br />{{ t("footer.address") }}</p>
         </address>
       </div>
