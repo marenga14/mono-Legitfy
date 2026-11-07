@@ -1,46 +1,35 @@
 # Legitfy
 
-Legitfy lets anyone check whether a document is genuine, directly against a public record, and gives institutions one private place to issue documents and answer verification requests.
+**A simple way to know a document is genuine.**
+
+Imagine you've just finished university. You've worked for years for one sheet of paper, and now it's the thing standing between you and your first job.
+
+The employer likes you, but they've seen convincing fakes before. So they email your university and wait. The message lands in a busy inbox with nobody's name on it. A week goes by, then two. Meanwhile, copies of your certificate sit in inboxes you'll never see, and the job goes to someone else.
+
+Nobody in that story did anything wrong. The employer just wanted to be sure, the registrar was doing their best, and you had earned what you claimed. The system simply had no good way for them to trust each other.
+
+Legitfy is built to change that.
+
+An institution joins, proves who it is, and publishes a fingerprint of each document it issues. The document itself stays private. From then on, anyone can check that document for free, in seconds, without an account and without knowing anyone at the institution. If there's no record, the question goes straight to the people who can answer it, and someone owns it until it's answered.
+
+We want checking a document to be as easy as checking a website address, starting with universities, colleges and professional bodies in Tanzania and growing across borders. A graduate's record should mean the same thing wherever they take it.
 
 **Status:** pre-launch. Nothing is live on a public network yet.
 
-## The problem
+## Screenshots
 
-Certificates decide who gets hired, promoted or admitted, but the way they're checked hasn't kept up.
+Coming soon.
 
-- **A document that looks right proves very little.** A convincing fake is easy to make, and a stamp or signature can be copied.
-- **Checking depends on who you can reach.** Employers and universities email or phone registrars, then wait days or weeks, often with no answer.
-- **Institutions carry the load by hand.** Requests arrive through inboxes and front desks, with no owner, no deadline and no record of who answered.
-- **Personal documents travel too far.** Certificates get forwarded and left in inboxes, with no way to see who opened them or take them back.
+<!--
+To add a screenshot, put the image in docs/screenshots/ with the name below,
+then move its line out of this comment and remove "Coming soon." above.
 
-## What Legitfy does
-
-- **Institutions are checked first.** Each one applies with its registration documents, and the person applying has their identity confirmed before approval.
-- **Institutions publish a fingerprint of each document.** The fingerprint goes on a public blockchain, and the document stays private.
-- **Anyone can check, free.** Drop in a file, scan its seal or type its certificate ID to see who issued it and whether it still stands. No account is needed, and the file never leaves your device.
-- **Employers can check many at once.** Upload a list and get a spreadsheet of results back.
-- **When there's no record, ask the source.** Requests go to the issuing institution, where someone owns each one and the history can't be quietly rewritten.
-
-## The vision
-
-We want checking a document to be as simple as checking a website address: instant, free for the person asking, and not dependent on knowing anyone.
-
-Public verification is the front door. Behind it, Legitfy becomes a trusted way for institutions to exchange documents safely, starting with universities, colleges and professional bodies in Tanzania and growing across borders. A graduate's record should mean the same thing wherever they take it.
-
-## The chains
-
-**[BOT Chain](https://botchain.ai)** is Legitfy's main network. It holds the public record, which you can inspect on [BOTScan](https://scan.botchain.ai).
-
-| Network | Chain ID | Use |
-|---|---|---|
-| BOT Chain | 677 | Main network |
-| BOT Chain Testnet | 968 | Testing |
-
-Public checks can search more than one network, so a document issued on another supported chain can still be found.
-
-**What goes on chain:** document fingerprints, issue and revocation dates, institution names, and a daily fingerprint of our activity log.
-
-**What never goes on chain:** documents, names of certificate holders, or any other personal data. A blockchain can't be erased, so private details stay off it.
+![Legitfy home page](docs/screenshots/home.png)
+![Checking a document](docs/screenshots/verify.png)
+![Applying as an institution](docs/screenshots/apply.png)
+![The institution console](docs/screenshots/console.png)
+![The request inbox](docs/screenshots/inbox.png)
+-->
 
 ## Learn more
 
