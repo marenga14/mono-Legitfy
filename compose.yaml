@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     init: true
     stop_grace_period: 30s
-    env_file: app.env
+    env_file: .env
     environment:
       TRUST_PROXY: "true"
       DATABASE_URL: postgres://legitfy:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@legitfy-db:5432/legitfy

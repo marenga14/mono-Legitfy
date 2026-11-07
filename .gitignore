@@ -20,8 +20,6 @@ keystore/
 
 .DS_Store
 
-# server settings for compose.yaml
-app.env
 
 # local chain state and sample files
 .local/

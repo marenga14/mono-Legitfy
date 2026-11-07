@@ -74,8 +74,7 @@ The API has to be hosted. Public checks only need the static site and an RPC, bu
 
 ```sh
 cd /opt/legitfy
-cp .env.example .env        # database password
-cp app.env.example app.env  # API settings
+cp .env.example .env   # then fill in the secrets and REGISTRY_ADDRESS
 docker compose up -d --build
 ```
 
@@ -102,7 +101,7 @@ Edit `nginx.conf` with `nano`, not `vim` or `sed -i`. Those replace the file, an
 | `VITE_SUPPORT_EMAIL` | `support@legitfy.dev` |
 | `VITE_CONTACT_EMAIL` | Optional |
 
-`WEB_ORIGIN` in `app.env` must match the site's address exactly, or the browser will block its calls to the API. Vercel preview URLs won't work against it.
+`WEB_ORIGIN` in `.env` must match the site's address exactly, or the browser will block its calls to the API. Vercel preview URLs won't work against it.
 
 Before real documents go in:
 
