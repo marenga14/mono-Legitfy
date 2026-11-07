@@ -74,4 +74,27 @@ router.beforeEach((to) => {
 export function showTitle(key: string) {
   document.title = key === "home" ? "Legitfy" : `${t(`titles.${key}`)} | Legitfy`;
 }
-router.afterEach((to) => showTitle(to.meta.title ?? "home"));
+router.afterEach((to) => {
+  showTitle(to.meta.title ?? "home");
+  forgetReload();
+});
+
+// A tab left open across a release asks for page files that no longer exist, and the click would
+// silently do nothing. Load that page fresh instead, once, so a real outage can't cause a reload loop.
+const RELOADED = "legitify.reloaded";
+const STALE_FILE = /dynamically imported module|importing a module script failed|unable to preload/i;
+function forgetReload() {
+  try { sessionStorage.removeItem(RELOADED); } catch { /* Private windows can refuse storage. */ }
+}
+function firstReloadOf(path: string) {
+  try {
+    if (sessionStorage.getItem(RELOADED) === path) return false;
+    sessionStorage.setItem(RELOADED, path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+router.onError((error: Error, to) => {
+  if (STALE_FILE.test(error.message) && firstReloadOf(to.fullPath)) window.location.assign(to.fullPath);
+});
