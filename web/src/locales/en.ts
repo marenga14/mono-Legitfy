@@ -44,6 +44,7 @@ export default {
   home: {
     problemTitle: "A document that looks right proves very little", problemLink: "Read the full case for Legitfy",
     applyTitle: "Issue credentials from your institution", applyBody: "Apply with your registration document and a letter signed by your director. We check every institution before it reaches the public record.",
+    bulkCta: "Upload a list",
     stepsLead: "From a file to ", stepsAccent: "an answer.", stepsSub: "A check takes seconds. When a record can't settle it, a person can.",
     step1Title: "Add the document", step1Body: "Drop in a file. It's read on your device, not uploaded.",
     step2Title: "Compare its fingerprint", step2Body: "The file's unique fingerprint is compared with the public record.",

@@ -46,6 +46,7 @@ const sw: typeof en = {
   home: {
     problemTitle: "Hati inayoonekana sahihi haithibitishi mengi", problemLink: "Soma sababu kamili za Legitfy",
     applyTitle: "Toa vyeti kutoka taasisi yako", applyBody: "Omba kwa hati yako ya usajili na barua iliyosainiwa na mkurugenzi wako. Tunakagua kila taasisi kabla haijaingia kwenye rekodi ya umma.",
+    bulkCta: "Pakia orodha",
     stepsLead: "Kutoka faili hadi ", stepsAccent: "jibu.", stepsSub: "Uhakiki huchukua sekunde chache. Rekodi isipotosha, mtu anaweza kuamua.",
     step1Title: "Weka hati", step1Body: "Weka faili. Linasomwa kwenye kifaa chako, halipakiwi.",
     step2Title: "Linganisha alama ya kidole", step2Body: "Alama ya kipekee ya faili inalinganishwa na rekodi ya umma.",

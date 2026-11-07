@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
-import { ArrowRight, Briefcase, Building2, FileUp, Fingerprint, GraduationCap, Landmark, ListChecks, ShieldCheck, UserCheck } from "lucide-vue-next";
+import { ArrowRight, Briefcase, Building2, FileSpreadsheet, FileUp, Fingerprint, GraduationCap, Landmark, ListChecks, ShieldCheck, UserCheck } from "lucide-vue-next";
 import InstitutionShowcase from "../components/InstitutionShowcase.vue";
 import NetworkList from "../components/NetworkList.vue";
 import StoryRows from "../components/StoryRows.vue";
@@ -42,8 +42,22 @@ const audiences = computed(() => [
         <a href="#infrastructure" class="btn btn-quiet">{{ t("hero.explore") }}</a>
       </div>
       <p class="mt-8 flex items-center gap-2 text-sm text-ink-soft"><ShieldCheck class="size-5 text-approve" aria-hidden="true" />{{ t("hero.free") }}</p>
+      <RouterLink to="/verify/bulk" class="link mt-3 inline-block text-sm">{{ t("bulk.link") }}</RouterLink>
     </div>
     <VerifyConsole ref="verifier" />
+  </section>
+
+  <section class="mx-auto max-w-7xl px-6 pb-16 lg:pb-24">
+    <div class="glass flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+      <div class="flex gap-5">
+        <FileSpreadsheet class="size-10 shrink-0 text-periwinkle" stroke-width="1.5" aria-hidden="true" />
+        <div>
+          <h2 class="text-3xl">{{ t("bulk.title") }}</h2>
+          <p class="mt-2 max-w-2xl text-ink-soft">{{ t("bulk.body") }}</p>
+        </div>
+      </div>
+      <RouterLink to="/verify/bulk" class="btn shrink-0">{{ t("home.bulkCta") }} <ArrowRight class="size-4" aria-hidden="true" /></RouterLink>
+    </div>
   </section>
 
   <section class="relative border-y border-periwinkle/15 bg-paper/70">

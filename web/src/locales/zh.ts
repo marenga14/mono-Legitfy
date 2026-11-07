@@ -46,6 +46,7 @@ const zh: typeof en = {
   home: {
     problemTitle: "看起来真实的文件并不能证明什么", problemLink: "了解选择 Legitfy 的完整理由",
     applyTitle: "由贵机构签发证书", applyBody: "提交注册文件和由机构负责人签署的授权函即可申请。每家机构在进入公开记录前都会经过我们的审核。",
+    bulkCta: "上传清单",
     stepsLead: "从一份文件到", stepsAccent: "一个答案。", stepsSub: "核验只需几秒钟。记录无法判定时，由人来判断。",
     step1Title: "添加文件", step1Body: "拖入文件。文件在您的设备上读取，不会上传。",
     step2Title: "比对指纹", step2Body: "将文件的唯一指纹与公开记录进行比对。",
