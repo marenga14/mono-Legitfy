@@ -1,0 +1,13 @@
+{
+  "name": "Legitfy",
+  "short_name": "Legitfy",
+  "description": "Check a document against a public record, or ask the institution that issued it.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#190660",
+  "theme_color": "#190660",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

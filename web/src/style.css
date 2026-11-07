@@ -1,0 +1,155 @@
+@import "@fontsource-variable/plus-jakarta-sans";
+@import "tailwindcss";
+
+/* Public site by default. The console (`html.theme-console`) remaps the same tokens, so every
+   page uses text-ink, bg-sheet and so on and takes on whichever world it lives in. */
+@theme {
+  --color-paper: #0a0930;
+  --color-paper-deep: #1a1560;
+  --color-sheet: #13104a;
+  --color-ink: #f4f5ff;
+  --color-ink-soft: #c9cdf0;
+  --color-stamp: #7c4dff;
+  --color-stamp-deep: #6a3bf0;
+  --color-seal: #ff9a9a;
+  --color-approve: #3ddc97;
+  --color-caution: #f6c667;
+  --color-periwinkle: #8fa8ff;
+  --color-harbour: #095073;
+  --color-harbour-deep: #0a0930;
+  --color-sky: #a4def2;
+  --color-lagoon: #1f7a78;
+  --color-wash: #f1f3f5;
+  --color-line: #cfd8de;
+  --font-display: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+
+/* The same two worlds, each with its opposite. A visitor's choice follows them across both. */
+html[data-theme="light"]:not(.theme-console) {
+  --color-paper: #f5f4fd;
+  --color-paper-deep: #e7e4fb;
+  --color-sheet: #ffffff;
+  --color-ink: #17124f;
+  --color-ink-soft: #4c4a7c;
+  --color-stamp: #5a33dc;
+  --color-stamp-deep: #4823bd;
+  --color-seal: #b3261e;
+  --color-approve: #0f7a4f;
+  --color-caution: #875600;
+  --color-periwinkle: #4258c9;
+  --sweep-a: rgb(124 77 255 / 0.16);
+  --sweep-b: rgb(143 168 255 / 0.22);
+  --sweep-c: rgb(143 168 255 / 0.14);
+  --accent-from: #6a3bf0;
+  --accent-to: #3f5fd8;
+}
+/* The console shares the landing page's palette. Only its working colours are its own. */
+html.theme-console {
+  --color-harbour: #cfd6ff;
+  --color-sky: #15114f;
+  --color-wash: rgb(143 168 255 / 0.1);
+  --color-line: rgb(143 168 255 / 0.22);
+  --color-lagoon: #7c4dff;
+  --color-lagoon-deep: #6a3bf0;
+}
+html.theme-console[data-theme="light"] {
+  --color-paper: #f5f4fd;
+  --color-paper-deep: #e7e4fb;
+  --color-sheet: #ffffff;
+  --color-ink: #17124f;
+  --color-ink-soft: #4c4a7c;
+  --color-stamp: #5a33dc;
+  --color-stamp-deep: #4823bd;
+  --color-seal: #b3261e;
+  --color-approve: #0f7a4f;
+  --color-caution: #875600;
+  --color-periwinkle: #4258c9;
+  --color-harbour: #2c1b8f;
+  --color-sky: #ece9fd;
+  --color-wash: rgb(90 51 220 / 0.07);
+  --color-line: rgb(66 88 201 / 0.2);
+  --color-lagoon: #5a33dc;
+  --color-lagoon-deep: #4823bd;
+  --sweep-a: rgb(124 77 255 / 0.16);
+  --sweep-b: rgb(143 168 255 / 0.22);
+  --accent-from: #6a3bf0;
+  --accent-to: #3f5fd8;
+}
+
+/* The Latin face has no CJK glyphs, and tight tracking crowds them. */
+html:lang(zh) {
+  --font-display: "Plus Jakarta Sans Variable", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans Variable", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+}
+
+@layer base {
+  html:lang(zh) h1, html:lang(zh) h2, html:lang(zh) h3 { letter-spacing: 0 !important; line-height: 1.2 !important; }
+  dialog { background: var(--color-sheet); color: var(--color-ink); }
+  html { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); -webkit-text-size-adjust: 100%; }
+  body { font-size: 1rem; line-height: 1.6; min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--font-display); line-height: 1.08; letter-spacing: -0.028em; font-weight: 700; text-wrap: balance; }
+  :focus-visible { outline: 3px solid var(--color-periwinkle); outline-offset: 2px; border-radius: 4px; }
+}
+
+@layer components {
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 2.75rem; padding: 0.5rem 1.35rem; font-weight: 600; background: var(--color-stamp); color: #fff; border-radius: 999px; cursor: pointer; transition: background-color 0.15s; }
+  .btn:hover { background: var(--color-stamp-deep); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .btn-quiet { background: transparent; color: var(--color-ink); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-ink) 45%, transparent); }
+  .btn-quiet:hover { background: color-mix(in srgb, var(--color-ink) 10%, transparent); }
+  .field { display: block; width: 100%; min-height: 2.75rem; padding: 0.5rem 0.8rem; background: var(--color-sheet); border: 1.5px solid color-mix(in srgb, var(--color-ink-soft) 55%, transparent); border-radius: 8px; }
+  .link { color: var(--color-periwinkle); text-decoration: underline; text-underline-offset: 3px; }
+  .hash { font-family: var(--font-mono); font-size: 0.82em; overflow-wrap: anywhere; }
+  .brand-top { fill: #190660; }
+  .brand-bottom { fill: #5d20fd; }
+  html[data-theme="dark"] .brand-top { fill: #fff; }
+  html[data-theme="dark"] .brand-bottom { fill: #8a5cff; }
+  /* For a mark sitting on something white, whatever the page's theme. */
+  html[data-theme] .brand-on-white .brand-top { fill: #190660; }
+  html[data-theme] .brand-on-white .brand-bottom { fill: #5d20fd; }
+  /* The wordmark from the logo, used as a mask so it takes the text colour in any theme. */
+  .brand-wordmark { display: inline-block; height: 1.3em; aspect-ratio: 719 / 225; background: currentColor; mask: url("/brand/wordmark.png") center / contain no-repeat; }
+  .brand-tile { display: grid; place-items: center; background: #efecfe; border-radius: 22%; }
+  html[data-theme="dark"] .brand-tile { background: #190660; }
+  .glass { background: color-mix(in srgb, var(--color-paper-deep) 55%, transparent); border: 1px solid color-mix(in srgb, var(--color-periwinkle) 22%, transparent); border-radius: 14px; }
+  .btn-icon { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 8px; cursor: pointer; }
+  .btn-icon:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+  .text-verifiable { background: linear-gradient(95deg, var(--accent-from, #a06bff), var(--accent-to, #8fa8ff) 75%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* The console: the same glass and glow as the landing page, with denser tables. */
+  html.theme-console .field { border-color: var(--color-line); }
+  .btn-view { min-height: 2.25rem; padding: 0.25rem 1.15rem; background: var(--color-lagoon); }
+  .btn-view:hover { background: var(--color-lagoon-deep); }
+  .bg-gradient { background-image: linear-gradient(95deg, #6a3bf0, #4258c9); color: #fff; }
+  .panel { background: color-mix(in srgb, var(--color-sheet) 72%, transparent); border: 1px solid var(--color-line); border-radius: 14px; backdrop-filter: blur(10px); }
+  .stat-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+  a.stat-card:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgb(124 77 255 / 0.28); }
+  /* Always violet, so it reads the same as the landing page in either theme. */
+  .console-banner { position: relative; overflow: hidden; color: #fff; border-radius: 14px; background: linear-gradient(115deg, #6a3bf0, #3b2bb8 55%, #1a1560); box-shadow: 0 16px 44px rgb(92 62 245 / 0.32); }
+  .console-banner::after { content: ""; position: absolute; right: -6rem; top: -10rem; width: 26rem; height: 26rem; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, rgb(143 168 255 / 0.4), transparent); }
+  .console-shell { position: relative; background:
+    radial-gradient(60rem 34rem at 88% -6%, var(--sweep-a, rgb(92 62 245 / 0.36)), transparent 70%),
+    radial-gradient(38rem 26rem at 12% 0%, var(--sweep-b, rgb(124 77 255 / 0.2)), transparent 70%); }
+  .console-side { background: color-mix(in srgb, var(--color-sky) 82%, transparent); border: 1px solid var(--color-line); border-radius: 14px; backdrop-filter: blur(12px); }
+  .nav-active { background: linear-gradient(95deg, #7c4dff, #5a4fe0); color: #fff; box-shadow: 0 8px 22px rgb(124 77 255 / 0.4); }
+  .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+  .data-table th { padding: 0.8rem 1rem; font-weight: 600; white-space: nowrap; }
+  .data-table td { padding: 0.8rem 1rem; border-bottom: 1px solid var(--color-line); }
+  .data-table tbody tr:nth-child(odd) td { background: color-mix(in srgb, var(--color-wash) 55%, transparent); }
+  .data-table tbody tr:last-child td { border-bottom: 0; }
+}
+
+/* Added by v-reveal, so anything it doesn't reach simply stays visible. */
+.reveal { opacity: 0; transform: translateY(1.25rem); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.reveal.is-in { opacity: 1; transform: none; }
+.reveal .story-ridge { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.9s ease-out; }
+.reveal.is-in .story-ridge { stroke-dashoffset: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; }
+  .reveal .story-ridge { stroke-dashoffset: 0; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}

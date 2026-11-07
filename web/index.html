@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Legitfy is verification infrastructure for institutions, employers and individuals. Check a document against a public record, or ask the institution that issued it." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#0a0930" />
+    <title>Legitfy</title>
+    <script>
+      // Set before first paint, so a saved theme never flashes the other one.
+      (function () {
+        var inConsole = /^\/app(\/|$)/.test(location.pathname), saved = null;
+        try { saved = localStorage.getItem("legitify.theme"); } catch (e) {}
+        document.documentElement.classList.toggle("theme-console", inConsole);
+        document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
