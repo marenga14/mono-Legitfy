@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import CountrySelect from "../components/CountrySelect.vue";
+import DistrictSelect from "../components/DistrictSelect.vue";
+import { DEFAULT_COUNTRY } from "../lib/places";
 import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import type { Address } from "viem";
@@ -13,7 +16,7 @@ const ID_TYPES = ["national_id", "passport", "driving_licence", "voter_id"];
 const TYPES = ["university", "college", "school", "professional_body", "government", "other"];
 const router = useRouter();
 const form = reactive({
-  institutionName: "", registrationNumber: "", institutionType: "", country: "", city: "", website: "", officialEmail: "", phone: "",
+  institutionName: "", registrationNumber: "", institutionType: "", country: DEFAULT_COUNTRY, city: "", website: "", officialEmail: "", phone: "",
   applicantName: "", applicantPosition: "", applicantEmail: "", signatoryName: "", signatoryTitle: "", identityDocument: "", identityNumber: "",
 });
 const file = ref<File>();
@@ -81,8 +84,8 @@ async function submit() {
             <option v-for="type in TYPES" :key="type" :value="type">{{ t(`applications.types.${type}`) }}</option>
           </select>
         </label>
-        <label>{{ t("apply.country") }}<input v-model="form.country" class="field mt-1" required minlength="2" maxlength="100" autocomplete="country-name" /></label>
-        <label>{{ t("apply.city") }}<input v-model="form.city" class="field mt-1" required minlength="2" maxlength="100" /></label>
+        <label>{{ t("apply.country") }}<CountrySelect v-model="form.country" /></label>
+        <label>{{ t("apply.city") }}<DistrictSelect v-model="form.city" :country="form.country" /></label>
         <label>{{ t("apply.email") }}<input v-model="form.officialEmail" type="email" class="field mt-1" required maxlength="254" /></label>
         <label>{{ t("apply.phone") }}<input v-model="form.phone" type="tel" class="field mt-1" required minlength="5" maxlength="40" /></label>
         <label class="sm:col-span-2">{{ t("apply.website") }}<input v-model="form.website" type="url" class="field mt-1" maxlength="200" placeholder="https://" /></label>

@@ -982,7 +982,7 @@ describe("institution profile", () => {
     expect(await (await app.request(`/platform/changes/${id}/file`, authed(owner.token))).text()).toBe(PDF);
     await db.query("UPDATE institutions SET official_email = 'registrar@a.example' WHERE id = 1");
     expect((await app.request(`/platform/changes/${id}/approve`, authed(owner.token, {}))).status).toBe(200);
-    expect(sent.at(-1)).toMatchObject({ to: "registrar@a.example", subject: "Your city change was approved" });
+    expect(sent.at(-1)).toMatchObject({ to: "registrar@a.example", subject: "Your region or district change was approved" });
     expect((await app.request(`/platform/changes/${id}/approve`, authed(owner.token, {}))).status).toBe(409);
     const after = await details(token);
     expect(after).toMatchObject({ city: "Arusha", location: "Arusha, Tanzania" });

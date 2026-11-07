@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from "vue";
+import CountrySelect from "../../components/CountrySelect.vue";
+import DistrictSelect from "../../components/DistrictSelect.vue";
 import PageHead from "../../components/console/PageHead.vue";
 import { api } from "../../lib/api";
 import { longDate } from "../../lib/certificate";
@@ -21,6 +23,7 @@ const savingContacts = ref(false);
 const contactsSaved = ref(false);
 const dialog = ref<HTMLDialogElement>();
 const change = reactive({ field: "city" as Field, value: "", reason: "" });
+const opened = ref(0);
 const evidence = ref<File>();
 const sending = ref(false);
 const changeError = ref("");
@@ -51,6 +54,7 @@ async function saveContacts() {
 }
 function startChange(field: Field) {
   Object.assign(change, { field, value: "", reason: "" });
+  opened.value += 1;
   evidence.value = undefined;
   changeError.value = "";
   dialog.value?.showModal();
@@ -132,6 +136,8 @@ async function sendChange() {
           <option v-for="type in TYPES" :key="type" :value="type">{{ t(`applications.types.${type}`) }}</option>
         </select>
       </label>
+      <label v-else-if="change.field === 'country'" class="block">{{ t("profile.newValue") }}<CountrySelect v-model="change.value" /></label>
+      <label v-else-if="change.field === 'city'" class="block">{{ t("profile.newValue") }}<DistrictSelect :key="opened" v-model="change.value" :country="details?.country ?? ''" /></label>
       <label v-else class="block">{{ t("profile.newValue") }}<input v-model="change.value" class="field mt-1" required minlength="2" maxlength="100" /></label>
       <label class="block">{{ t("profile.reason") }}<textarea v-model="change.reason" class="field mt-1" rows="3" required minlength="3" maxlength="1000"></textarea></label>
       <label class="block">{{ t("profile.evidence") }}

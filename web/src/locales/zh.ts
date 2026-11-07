@@ -119,7 +119,7 @@ const zh: typeof en = {
     needTitle: "您需要准备", need1: "贵机构的注册或认证文件", need2: "由贵机构指定负责账户的人员",
     need3: "一封由机构负责人签署并加盖机构公章的信函。完成此步骤后我们会为您生成，您可以稍后再回来", need4: "指定人员的钱包。我们会告诉您如何设置", need5: "申请人的政府证件类型和号码", identitySection: "您的身份", identityWhy: "我们会向证件签发机关核实您的证件号码，以确认谁在代表该机构申请。号码经加密存储，只有 Legitfy 的审核人员才能查看，绝不会出现在公开记录中。如果申请未获批准，我们会将其删除。", identityDocument: "证件类型", chooseIdentity: "请选择证件", identityNumber: "证件号码", identityConsent: "我同意 Legitfy 就本次申请向证件签发机关核实我的证件号码。",
     institutionSection: "贵机构", name: "正式名称", nameHint: "请与注册文件完全一致。进入公开记录后无法更改。", number: "注册或认证编号", type: "机构类型", chooseType: "请选择类型",
-    country: "国家", city: "城市", email: "官方邮箱", phone: "电话", website: "网站（选填）", registrationFile: "注册或认证文件", fileHint: "PDF、JPEG 或 PNG，不超过 15 MB。",
+    country: "国家", city: "省份或地区", chooseCountry: "选择国家", chooseDistrict: "选择省份或地区", chooseCountryFirst: "请先选择国家", districtNotListed: "未列出", districtPlaceholder: "输入您所在的地区", email: "官方邮箱", phone: "电话", website: "网站（选填）", registrationFile: "注册或认证文件", fileHint: "PDF、JPEG 或 PNG，不超过 15 MB。",
     applicantEmail: "其官方邮箱", applicantEmailHint: "请使用办公邮箱，不要使用个人邮箱。",
     peopleSection: "负责人", applicantName: "指定人员全名", applicantPosition: "其职位", signatoryName: "机构负责人全名", signatoryTitle: "其职务", signatoryHint: "校长、院长或主任",
     walletSection: "此账户的钱包", walletWhy: "此钱包将成为贵机构的管理员，用于登录控制台和发布证书。连接钱包可证明您持有它，且不产生任何费用。",
@@ -236,7 +236,7 @@ const zh: typeof en = {
   },
   profile: {
     title: "机构资料", contactTitle: "联系方式", contactBody: "您可以随时更新这些信息。", save: "保存联系方式", saved: "已保存", registeredTitle: "注册信息", registeredBody: "这些信息在贵机构获批时已经核实，因此变更时需要提供证明文件，并由 Legitfy 审核。", nameLocked: "此名称在公开记录中永久保存，无法在此更改。如有错误，请联系 Legitfy 支持团队。", notRecorded: "未记录", waiting: "等待审核", requestChange: "申请变更", historyTitle: "变更申请", requestTitle: "变更{field}", newValue: "新内容", reason: "变更原因", evidence: "证明文件", send: "提交申请",
-    fields: { registration_number: "注册编号", institution_type: "机构类型", country: "国家", city: "城市" },
+    fields: { registration_number: "注册编号", institution_type: "机构类型", country: "国家", city: "省份或地区" },
     status: { pending: "等待审核", approved: "已批准", rejected: "未批准" },
   },
   changes: {

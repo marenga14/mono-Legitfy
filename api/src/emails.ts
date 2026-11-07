@@ -9,9 +9,9 @@ interface Message { subject: string; lines: string[]; steps?: string[]; action?:
 interface Footer { sent: string; help: string }
 
 const FIELDS: Record<Locale, Record<string, string>> = {
-  en: { registration_number: "registration number", institution_type: "institution type", country: "country", city: "city" },
-  sw: { registration_number: "namba ya usajili", institution_type: "aina ya taasisi", country: "nchi", city: "jiji" },
-  zh: { registration_number: "注册编号", institution_type: "机构类型", country: "国家", city: "城市" },
+  en: { registration_number: "registration number", institution_type: "institution type", country: "country", city: "region or district" },
+  sw: { registration_number: "namba ya usajili", institution_type: "aina ya taasisi", country: "nchi", city: "mkoa au wilaya" },
+  zh: { registration_number: "注册编号", institution_type: "机构类型", country: "国家", city: "省份或地区" },
 };
 export const fieldName = (locale: Locale, field: string) => FIELDS[locale][field] ?? field;
 
