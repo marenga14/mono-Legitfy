@@ -26,6 +26,7 @@ export const router = createRouter({
     { path: "/developers", component: page("Developers"), meta: { title: "developers" } },
     { path: "/why", component: page("Why"), meta: { title: "why" } },
     { path: "/how-it-works", component: page("HowItWorks"), meta: { title: "how" } },
+    { path: "/try", component: page("Try"), meta: { title: "try" } },
     { path: "/security", component: page("Security"), meta: { title: "security" } },
     { path: "/verify", component: page("Verify"), meta: { title: "verify" } },
     { path: "/verify/bulk", component: page("VerifyBulk"), meta: { title: "bulkCheck" } },

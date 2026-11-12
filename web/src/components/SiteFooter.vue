@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { RouterLink } from "vue-router";
-import { botChainSite, explorerUrl, networkList, supportEmail } from "../lib/config";
+import { contactEmail, networkList, supportEmail } from "../lib/config";
 import { currentLocale, t } from "../lib/i18n";
 import BrandMark from "./BrandMark.vue";
+import BuiltOnBotChain from "./BuiltOnBotChain.vue";
 import BrandWordmark from "./BrandWordmark.vue";
 
 const columns = computed(() => [
@@ -21,6 +22,7 @@ const columns = computed(() => [
   { title: t("footer.getStarted"), links: [
     { to: "/apply", label: t("footer.apply") },
     { to: "/request", label: t("footer.ask") },
+    { to: "/try", label: t("titles.try") },
     { to: "/sign-in", label: t("nav.staffSignIn") },
   ] },
 ]);
@@ -44,6 +46,7 @@ const year = new Date().getFullYear();
         <h2 class="text-base tracking-normal!">{{ t("footer.contact") }}</h2>
         <address class="mt-3 space-y-2 not-italic text-ink-soft">
           <a class="block hover:text-ink hover:underline" :href="`mailto:${supportEmail}`">{{ supportEmail }}</a>
+          <a class="block hover:text-ink hover:underline" :href="`mailto:${contactEmail}`">{{ contactEmail }}</a>
           <a class="block hover:text-ink hover:underline" href="https://x.com/LegitifyHQ" target="_blank" rel="noopener">@LegitifyHQ</a>
           <p>{{ t("footer.hq") }}<br />{{ t("footer.address") }}</p>
         </address>
@@ -53,11 +56,7 @@ const year = new Date().getFullYear();
       <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-8 gap-y-2 px-6 py-5 text-ink-soft">
         <p>{{ t("footer.rights", { year }) }}</p>
         <p>{{ t("footer.record", { network: networkList(currentLocale()) }) }}</p>
-        <p>
-          {{ t("footer.builtOn") }} <a class="link" :href="botChainSite" target="_blank" rel="noopener">BOT Chain</a>
-          <span aria-hidden="true"> · </span>
-          <a class="link" :href="explorerUrl" target="_blank" rel="noopener">{{ t("footer.explorer") }}</a>
-        </p>
+        <BuiltOnBotChain />
       </div>
     </div>
   </footer>

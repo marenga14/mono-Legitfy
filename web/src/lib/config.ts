@@ -25,8 +25,11 @@ export const isDevChain = !network;
 export const networkName = isDevChain ? NETWORKS[677].name : live.name ?? network.name;
 export const explorerUrl: string = isDevChain ? NETWORKS[677].explorer : live.explorerUrl ?? network.explorer;
 export const botChainSite = "https://botchain.ai";
+/** Always the mainnet explorer, which BOT Chain asked to be linked by name. */
+export const botChainExplorer = "https://scan.botchain.ai";
 export const rpcUrl: string = live.rpcUrl || env.VITE_RPC_URL || network?.rpc || "http://127.0.0.1:8545";
-export const contactEmail: string | undefined = env.VITE_CONTACT_EMAIL || undefined;
+/** A personal address until the company one is ready. Set VITE_CONTACT_EMAIL to replace it. */
+export const contactEmail: string = env.VITE_CONTACT_EMAIL || "marengajulius@gmail.com";
 /** Shown in the site footer. */
 export const supportEmail: string = env.VITE_SUPPORT_EMAIL || "support@legitfy.dev";
 export const registryAddress = (live.registry || env.VITE_REGISTRY_ADDRESS || undefined) as Address | undefined;

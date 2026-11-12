@@ -14,7 +14,18 @@ An institution joins, proves who it is, and publishes a fingerprint of each docu
 
 We want checking a document to be as easy as checking a website address, starting with universities, colleges and professional bodies in Tanzania and growing across borders. A graduate's record should mean the same thing wherever they take it.
 
-**Status:** pre-launch. Nothing is live on a public network yet.
+**Status:** live on BOT Chain mainnet (chain 677).
+
+- Website: https://www.legitfy.dev
+- Try it yourself: https://www.legitfy.dev/try
+- Updates: [@LegitifyHQ on X](https://x.com/LegitifyHQ)
+
+| Contract | Address |
+|---|---|
+| LegitifyRegistry | [`0x87e1A2EdBdE4E118AFaE5420C98C39b5C3641360`](https://scan.botchain.ai/address/0x87e1A2EdBdE4E118AFaE5420C98C39b5C3641360) |
+| AuditAnchor | [`0x32b72ddF7d1D5fE11DAa371f0255c585051E41Aa`](https://scan.botchain.ai/address/0x32b72ddF7d1D5fE11DAa371f0255c585051E41Aa) |
+
+Both contracts are owned by `0x5185E7349a7C6fD6cae0Ea21059b8F16D5F17e0a`.
 
 ## Screenshots
 

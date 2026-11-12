@@ -5,14 +5,14 @@ import type { Address } from "viem";
 import DetailField from "../../components/console/DetailField.vue";
 import PageHead from "../../components/console/PageHead.vue";
 import { api } from "../../lib/api";
-import { t } from "../../lib/i18n";
+import { i18n, LOCALES, t, type Locale } from "../../lib/i18n";
 import { canWrite, registerInstitution } from "../../lib/wallet";
 
 interface Application {
   id: string; institution_name: string; registration_number: string; institution_type: string; country: string; city: string;
   website: string; official_email: string; phone: string; applicant_name: string; applicant_position: string; applicant_email: string;
   signatory_name: string; signatory_title: string; wallet: string; status: string; mandate_type: string | null; identity_document: string | null;
-  review_reason: string | null; on_chain: boolean;
+  review_reason: string | null; on_chain: boolean; locale: string;
 }
 type Kind = "registration" | "mandate";
 const id = String(useRoute().params.id);
@@ -20,6 +20,14 @@ const a = ref<Application | null>(null);
 const error = ref("");
 const busy = ref(false);
 const reason = ref("");
+const note = ref("");
+/** Ready-made reasons, written in the applicant's language because that's how the email goes out. */
+const TEMPLATES = ["document", "number", "letter", "identity", "eligible", "duplicate"] as const;
+const useTemplate = (k: (typeof TEMPLATES)[number]) => {
+  const locale = (LOCALES.find((l) => l.code === a.value?.locale)?.code ?? "en") as Locale;
+  reason.value = i18n.global.t(`applications.templates.${k}.text`, {}, { locale });
+};
+const recipients = computed(() => [...new Set([a.value?.applicant_email, a.value?.official_email].filter(Boolean))].join(", "));
 const urls = reactive<Partial<Record<Kind, string>>>({});
 const ticked = ref<number[]>([]);
 const open = computed(() => a.value?.status === "under_review" || a.value?.status === "awaiting_mandate");
@@ -58,7 +66,7 @@ const view = (kind: Kind) => attempt(async () => {
 const approve = () => attempt(async () => {
   await load();
   if (!a.value!.on_chain) await registerInstitution(a.value!.institution_name, a.value!.wallet as Address);
-  await api(`/platform/applications/${id}/approve`, { method: "POST", body: "{}" });
+  await api(`/platform/applications/${id}/approve`, { method: "POST", body: JSON.stringify({ note: note.value }) });
 });
 const reject = () => attempt(() => api(`/platform/applications/${id}/reject`, { method: "POST", body: JSON.stringify({ reason: reason.value }) }));
 </script>
@@ -103,11 +111,20 @@ const reject = () => attempt(() => api(`/platform/applications/${id}/reject`, { 
           <input v-model="ticked" type="checkbox" :value="n" class="mt-1 size-4 accent-stamp" />
           <span>{{ t(`applications.check${n}`) }}</span>
         </label>
+        <label class="block">{{ t("applications.noteLabel") }}<textarea v-model="note" class="field mt-1" rows="3" maxlength="1000" :placeholder="t('applications.notePlaceholder')"></textarea></label>
+        <p v-if="recipients" class="text-sm text-ink-soft">{{ t("applications.emailedTo", { to: recipients }) }}</p>
         <p class="text-sm text-ink-soft">{{ t("applications.permanent") }}</p>
         <button class="btn" :disabled="busy || !ready || !canWrite()">{{ busy ? t("common.waitingWallet") : t("applications.approve") }}</button>
       </form>
       <form class="panel space-y-3 p-5" @submit.prevent="reject">
-        <label class="block">{{ t("applications.rejectReason") }}<textarea v-model="reason" class="field mt-1" rows="3" required minlength="3" maxlength="1000"></textarea></label>
+        <div>
+          <p class="text-sm font-semibold">{{ t("applications.templatesTitle") }}</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <button v-for="k in TEMPLATES" :key="k" type="button" class="rounded-full border border-line px-3 py-1 text-sm hover:bg-paper-deep" @click="useTemplate(k)">{{ t(`applications.templates.${k}.label`) }}</button>
+          </div>
+        </div>
+        <label class="block">{{ t("applications.rejectReason") }}<textarea v-model="reason" class="field mt-1" rows="4" required minlength="3" maxlength="1000"></textarea></label>
+        <p v-if="recipients" class="text-sm text-ink-soft">{{ t("applications.emailedTo", { to: recipients }) }}</p>
         <p class="text-sm text-ink-soft">{{ t("applications.rejectNote") }}</p>
         <button class="btn btn-quiet" :disabled="busy">{{ t("applications.reject") }}</button>
       </form>

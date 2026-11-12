@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { ArrowRight, Briefcase, Building2, FileSpreadsheet, FileUp, Fingerprint, GraduationCap, Landmark, ListChecks, ShieldCheck, UserCheck } from "lucide-vue-next";
+import BuiltOnBotChain from "../components/BuiltOnBotChain.vue";
 import InstitutionShowcase from "../components/InstitutionShowcase.vue";
 import NetworkList from "../components/NetworkList.vue";
 import StoryRows from "../components/StoryRows.vue";
@@ -43,6 +44,7 @@ const audiences = computed(() => [
       </div>
       <p class="mt-8 flex items-center gap-2 text-sm text-ink-soft"><ShieldCheck class="size-5 text-approve" aria-hidden="true" />{{ t("hero.free") }}</p>
       <RouterLink to="/verify/bulk" class="link mt-3 inline-block text-sm">{{ t("bulk.link") }}</RouterLink>
+      <BuiltOnBotChain class="glass mt-6 w-fit px-4 py-2.5 text-sm" />
     </div>
     <VerifyConsole ref="verifier" />
   </section>

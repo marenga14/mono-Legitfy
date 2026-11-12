@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
-import { BadgeCheck, Building2, ClipboardList, FilePen, Landmark, FileText, Inbox, LayoutDashboard, LogOut, Menu, Settings, Users, X } from "lucide-vue-next";
+import { BadgeCheck, Building2, ClipboardList, Compass, FilePen, Landmark, FileText, Inbox, LayoutDashboard, LogOut, Menu, Settings, Users, X } from "lucide-vue-next";
 import { api, session, setSession } from "../../lib/api";
 import BrandMark from "../BrandMark.vue";
 import BrandWordmark from "../BrandWordmark.vue";
 import { t } from "../../lib/i18n";
 import LanguageSwitch from "../LanguageSwitch.vue";
 import ThemeToggle from "../ThemeToggle.vue";
+import ProductTour, { type TourStep } from "./ProductTour.vue";
+import { hasSeenTour, markTourSeen } from "../../lib/tour";
 
 const route = useRoute();
 const router = useRouter();
@@ -37,6 +39,29 @@ const nav = computed(() => {
     { to: "/app/settings", label: t("console.nav.settings"), icon: Settings },
   ];
 });
+/** Each step points at a menu item; items this role can't see are left out. */
+const touring = ref(false);
+const TOUR: Record<string, string> = {
+  "/app/dashboard": "dashboard", "/app/inbox": "inbox", "/app/institution": "profile", "/app/seal": "seal",
+  "/app/operators": "operators", "/app/documents": "documents", "/app/settings": "settings",
+};
+const tourSteps = computed<TourStep[]>(() => [
+  { title: t("tour.introTitle"), body: session.current?.role === "admin" ? t("tour.introAdmin") : t("tour.introOperator") },
+  ...nav.value.filter((item) => TOUR[item.to]).map((item) => ({
+    target: `[data-tour="${item.to}"]`, title: t(`tour.${TOUR[item.to]}Title`), body: t(`tour.${TOUR[item.to]}Body`),
+  })),
+  { target: "[data-tour=restart]", title: t("tour.doneTitle"), body: t("tour.doneBody") },
+]);
+function startTour() {
+  if (window.innerWidth < 1024) open.value = true; // The menu is hidden on small screens.
+  touring.value = true;
+}
+function endTour() {
+  touring.value = false;
+  open.value = false;
+  markTourSeen();
+}
+
 const isActive = (item: { to: string; exact?: boolean }) =>
   item.exact ? route.path === item.to : route.path.startsWith(item.to) || (item.to === "/app/inbox" && route.path.startsWith("/app/requests"));
 
@@ -53,6 +78,7 @@ async function refreshStorage() {
 onMounted(async () => {
   if (isStaff.value) institution.value = await api<{ institution: string }>("/me").then((m) => m.institution).catch(() => "");
   refreshStorage();
+  if (isStaff.value && !hasSeenTour()) startTour();
 });
 watch(() => route.path, () => {
   open.value = false;
@@ -78,10 +104,14 @@ async function signOut() {
         <button class="absolute right-2 top-2 rounded p-1 text-harbour lg:hidden" :aria-label="t('console.closeMenu')" @click="open = false"><X class="size-5" aria-hidden="true" /></button>
       </div>
       <nav class="mt-3 flex-1 space-y-1 overflow-y-auto px-2" :aria-label="t('console.label')">
-        <RouterLink v-for="item in nav" :key="item.to" :to="item.to" :class="['flex items-center gap-3 rounded-xl px-3 py-2.5 font-semibold transition-colors', isActive(item) ? 'nav-active' : 'text-harbour hover:bg-periwinkle/15']" :aria-current="isActive(item) ? 'page' : undefined">
+        <RouterLink v-for="item in nav" :key="item.to" :to="item.to" :data-tour="item.to" :class="['flex items-center gap-3 rounded-xl px-3 py-2.5 font-semibold transition-colors', isActive(item) ? 'nav-active' : 'text-harbour hover:bg-periwinkle/15']" :aria-current="isActive(item) ? 'page' : undefined">
           <span class="grid size-6 place-items-center rounded-full border-2 border-current"><component :is="item.icon" class="size-3.5" aria-hidden="true" /></span>
           {{ item.label }}
         </RouterLink>
+        <button v-if="isStaff" type="button" data-tour="restart" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-semibold text-harbour transition-colors hover:bg-periwinkle/15" @click="startTour">
+          <span class="grid size-6 place-items-center rounded-full border-2 border-current"><Compass class="size-3.5" aria-hidden="true" /></span>
+          {{ t("console.nav.tour") }}
+        </button>
       </nav>
       <div v-if="storage !== null" class="panel m-3 p-4 text-harbour">
         <p class="text-sm">{{ t("console.storage") }}</p>
@@ -107,4 +137,5 @@ async function signOut() {
       <main id="console-main" class="m-2 p-2 sm:p-3"><RouterView :key="route.path" /></main>
     </div>
   </div>
+  <ProductTour v-if="touring" :steps="tourSteps" @close="endTour" />
 </template>

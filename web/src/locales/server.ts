@@ -67,4 +67,5 @@ export const serverErrors: Record<string, { zh: string; sw: string }> = {
   "Upload the logo as a PNG or JPEG.": { zh: "请以 PNG 或 JPEG 格式上传徽标。", sw: "Pakia nembo kama PNG au JPEG." },
   "That network is already listed.": { zh: "该网络已在列表中。", sw: "Mtandao huo tayari umeorodheshwa." },
   "The network list is full.": { zh: "网络列表已满。", sw: "Orodha ya mitandao imejaa." },
+  "Keep the note under 1,000 characters.": { zh: "留言请控制在 1,000 个字符以内。", sw: "Ujumbe usizidi herufi 1,000." },
 };

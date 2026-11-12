@@ -14,6 +14,7 @@ import { t } from "../lib/i18n";
     <div class="mt-16 flex flex-wrap gap-3">
       <RouterLink to="/apply" class="btn">{{ t("institutions.apply") }}</RouterLink>
       <RouterLink to="/verify" class="btn btn-quiet">{{ t("hero.cta") }}</RouterLink>
+      <RouterLink to="/try" class="btn btn-quiet">{{ t("titles.try") }}</RouterLink>
     </div>
   </section>
 </template>
