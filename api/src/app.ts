@@ -39,6 +39,8 @@ export interface Deps {
   trustProxy?: boolean;
   /** Leave out to send no email. */
   mailer?: Mailer;
+  /** The platform admin's inbox, told about new applications. */
+  platformEmail?: string;
   /** Whether the daily audit fingerprint is being written to the chain. */
   anchoring?: boolean;
   /** Signs an approved UserOperation; absent until a paymaster is deployed. */
@@ -918,6 +920,9 @@ export function createApp(deps: Deps) {
     await notify([f.applicantEmail], "applicationReceived", f.locale, {
       name: f.applicantName, institution: f.institutionName, link: `${deps.webOrigin}/apply/${trackingToken}`,
     });
+    await notify([deps.platformEmail], "platformNewApplication", "en", {
+      institution: f.institutionName, place: `${f.city}, ${f.country}`, link: `${deps.webOrigin}/app/platform/applications/${id}`,
+    });
     return c.json({ trackingToken }, 201);
   });
 
@@ -946,6 +951,12 @@ export function createApp(deps: Deps) {
     await saveEvidence(a.id, "mandate", evidence.bytes);
     await db.query("UPDATE applications SET status = 'under_review', mandate_type = $1 WHERE id = $2", [evidence.type, a.id]);
     await appendAudit(db, { requestId: null, institutionId: null, actor: "applicant", action: "application.mandate", detail: { id: a.id } });
+    // Only the first letter: a replacement doesn't need a second alert.
+    if (a.status === "awaiting_mandate") {
+      await notify([deps.platformEmail], "platformLetterUploaded", "en", {
+        institution: a.institution_name, place: `${a.city}, ${a.country}`, link: `${deps.webOrigin}/app/platform/applications/${a.id}`,
+      });
+    }
     return c.json({ status: "under_review" });
   });
 
@@ -1121,6 +1132,8 @@ export function createApp(deps: Deps) {
     if (a.status !== "under_review") return c.json({ error: "This application isn't ready for a decision." }, 409);
     const member = await chain.getMember(a.wallet);
     if (member.role !== "admin") return c.json({ error: "Register this institution on-chain first." }, 409);
+    const body = z.object({ note: z.string().trim().max(1000).optional() }).safeParse(await c.req.json().catch(() => ({})));
+    if (!body.success) return c.json({ error: "Keep the note under 1,000 characters." }, 400);
     await syncInstitutions(db, chain);
     await db.query(
       `UPDATE institutions SET location = $1, website = $2, phone = $3, official_email = $4, registration_number = $5,
@@ -1134,7 +1147,7 @@ export function createApp(deps: Deps) {
     );
     await appendAudit(db, { requestId: null, institutionId: member.institutionId, actor: "platform", action: "application.approved", detail: { id: a.id } });
     await notify([a.applicant_email, a.official_email], "applicationApproved", a.locale, {
-      name: a.applicant_name, institution: a.institution_name, link: `${deps.webOrigin}/sign-in`,
+      name: a.applicant_name, institution: a.institution_name, link: `${deps.webOrigin}/sign-in`, note: body.data.note || undefined,
     });
     return c.json({ status: "approved", institutionId: member.institutionId });
   });

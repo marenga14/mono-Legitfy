@@ -363,6 +363,19 @@ describe("institution applications", () => {
     expect(sent[0]!.subject).toContain("Tumepokea");
     expect(sent[0]!.text).toContain(`http://localhost:5173/apply/${trackingToken}`);
   });
+  it("tells the platform admin about a new application and again when its letter arrives", async () => {
+    app = createApp({ ...deps, platformEmail: "admin@legitfy.example" });
+    const { trackingToken } = await (await apply({ locale: "sw" })).json();
+    const id = await pendingId();
+    const toAdmin = () => sent.filter((m) => m.to === "admin@legitfy.example");
+    expect(toAdmin()).toHaveLength(1);
+    expect(toAdmin()[0]!.subject).toBe("New application: Mbeya College");
+    expect(toAdmin()[0]!.text).toContain(`http://localhost:5173/app/platform/applications/${id}`);
+    expect(toAdmin()[0]!.text).not.toContain("neema@");
+    await upload(trackingToken);
+    await upload(trackingToken);
+    expect(toAdmin().map((m) => m.subject)).toEqual(["New application: Mbeya College", "Ready for review: Mbeya College"]);
+  });
   it("sends the rejection reason even though the address is erased", async () => {
     await apply();
     const id = await pendingId();
@@ -464,9 +477,11 @@ describe("institution applications", () => {
     members.set(applicant.address, { institutionId: 2, role: "admin" });
     expect((await (await app.request(`/platform/applications/${id}`, authed(token))).json()).on_chain).toBe(true);
     sent.length = 0;
-    expect((await approve()).status).toBe(200);
+    expect((await app.request(`/platform/applications/${id}/approve`, authed(token, { note: "x".repeat(1001) }))).status).toBe(400);
+    expect((await app.request(`/platform/applications/${id}/approve`, authed(token, { note: "Welcome aboard. Call us on Monday." }))).status).toBe(200);
     expect(sent.map((m) => m.to)).toEqual(["neema@mbeya.example", "registrar@mbeya.example"]);
     expect(sent[0]!.subject).toBe("Welcome to Legitfy, Mbeya College");
+    expect(sent[0]!.text).toContain("Welcome aboard. Call us on Monday.");
     expect(sent[0]!.text).toContain("http://localhost:5173/sign-in");
     expect(await track(trackingToken)).toMatchObject({ status: "approved" });
     expect((await upload(trackingToken)).status).toBe(409);

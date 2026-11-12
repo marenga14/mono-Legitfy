@@ -33,6 +33,7 @@ const app = createApp({
     ? resendMailer({ apiKey: config.RESEND_API_KEY, from: config.MAIL_FROM, replyTo: config.MAIL_REPLY_TO })
     : undefined,
   webOrigin: config.WEB_ORIGIN,
+  platformEmail: config.PLATFORM_EMAIL || undefined,
   registry: config.REGISTRY_ADDRESS as Address,
   dailySponsorQuota: config.DAILY_SPONSOR_QUOTA,
   trustProxy: config.TRUST_PROXY,

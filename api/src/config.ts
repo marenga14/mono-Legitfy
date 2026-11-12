@@ -21,7 +21,9 @@ const schema = z.object({
   ANTHROPIC_API_KEY: z.string().optional(),
   /** Without this the API sends no email, and everything else keeps working. */
   RESEND_API_KEY: z.string().optional(),
-  MAIL_FROM: z.string().default("Legitfy <hello@legitfy.dev>"),
+  MAIL_FROM: z.string().default("Legitfy <hello@mail.legitfy.dev>"),
+  /** Where new applications are announced. Leave empty to send none. */
+  PLATFORM_EMAIL: z.union([z.literal(""), z.email()]).optional(),
   MAIL_REPLY_TO: z.string().default("support@legitfy.dev"),
   DAILY_SPONSOR_QUOTA: z.coerce.number().default(500),
   TRUST_PROXY: z.stringbool().default(false),

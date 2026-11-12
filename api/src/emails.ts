@@ -1,10 +1,11 @@
 export type Locale = "en" | "sw" | "zh";
 export type EmailKind =
   | "applicationReceived" | "applicationApproved" | "applicationRejected"
-  | "requestReceived" | "requestAnswered" | "newRequest" | "changeApproved" | "changeRejected";
+  | "requestReceived" | "requestAnswered" | "newRequest" | "changeApproved" | "changeRejected"
+  | "platformNewApplication" | "platformLetterUploaded";
 
 /** Everything a message can mention. Each one is escaped before it goes in the HTML. */
-export interface EmailData { name?: string; institution?: string; link?: string; reason?: string; field?: string; value?: string }
+export interface EmailData { name?: string; institution?: string; link?: string; reason?: string; field?: string; value?: string; note?: string; place?: string }
 interface Message { subject: string; lines: string[]; steps?: string[]; action?: string; note?: string }
 interface Footer { sent: string; help: string }
 
@@ -23,6 +24,16 @@ const FOOTER: Record<Locale, Footer> = {
 
 const MESSAGES: Record<Locale, Record<EmailKind, (d: EmailData) => Message>> = {
   en: {
+    platformNewApplication: (d) => ({
+      subject: `New application: ${d.institution}`,
+      lines: [`${d.institution} (${d.place}) has applied to join Legitfy.`, "Nothing to decide yet: the applicant still has to upload a letter signed by their head of institution. We'll email you again when it arrives."],
+      action: "Open the application",
+    }),
+    platformLetterUploaded: (d) => ({
+      subject: `Ready for review: ${d.institution}`,
+      lines: [`${d.institution} (${d.place}) has uploaded its signed letter. The application is ready for your decision.`],
+      action: "Review the application",
+    }),
     applicationReceived: (d) => ({
       subject: `We've received the application for ${d.institution}`,
       lines: [`Hi ${d.name},`, `Thanks for applying to bring ${d.institution} to Legitfy.`, "Next, your head of institution needs to sign and stamp your letter of appointment. Use your tracking link to download the letter, upload it when it's signed, and follow your application."],
@@ -30,7 +41,7 @@ const MESSAGES: Record<Locale, Record<EmailKind, (d: EmailData) => Message>> = {
     }),
     applicationApproved: (d) => ({
       subject: `Welcome to Legitfy, ${d.institution}`,
-      lines: [`Hi ${d.name},`, `Good news: ${d.institution} has been approved and is now registered on the public record.`, "To get started:"],
+      lines: [`Hi ${d.name},`, `Good news: ${d.institution} has been approved and is now registered on the public record.`, ...(d.note ? [`A note from the Legitfy team:\n${d.note}`] : []), "To get started:"],
       steps: ["Sign in with the wallet you applied with.", "Check your institution profile and certificate seal.", "Add the staff who will work with you.", "Create your first certificate."],
       action: "Sign in to Legitfy",
     }),
@@ -65,6 +76,16 @@ const MESSAGES: Record<Locale, Record<EmailKind, (d: EmailData) => Message>> = {
     }),
   },
   sw: {
+    platformNewApplication: (d) => ({
+      subject: `Ombi jipya: ${d.institution}`,
+      lines: [`${d.institution} (${d.place}) imeomba kujiunga na Legitfy.`, "Hakuna cha kuamua bado: mwombaji bado anapaswa kupakia barua iliyosainiwa na mkuu wa taasisi. Tutakutumia barua pepe tena itakapofika."],
+      action: "Fungua ombi",
+    }),
+    platformLetterUploaded: (d) => ({
+      subject: `Tayari kukaguliwa: ${d.institution}`,
+      lines: [`${d.institution} (${d.place}) imepakia barua iliyosainiwa. Ombi liko tayari kwa uamuzi wako.`],
+      action: "Kagua ombi",
+    }),
     applicationReceived: (d) => ({
       subject: `Tumepokea ombi la ${d.institution}`,
       lines: [`Habari ${d.name},`, `Asante kwa kuomba kuileta ${d.institution} kwenye Legitfy.`, "Hatua inayofuata ni mkuu wa taasisi kusaini na kugonga muhuri barua yako ya uteuzi. Tumia kiungo chako cha ufuatiliaji kupakua barua, kuipakia ikishasainiwa, na kufuatilia ombi lako."],
@@ -72,7 +93,7 @@ const MESSAGES: Record<Locale, Record<EmailKind, (d: EmailData) => Message>> = {
     }),
     applicationApproved: (d) => ({
       subject: `Karibu Legitfy, ${d.institution}`,
-      lines: [`Habari ${d.name},`, `Habari njema: ${d.institution} imeidhinishwa na sasa imesajiliwa kwenye rekodi ya umma.`, "Ili kuanza:"],
+      lines: [`Habari ${d.name},`, `Habari njema: ${d.institution} imeidhinishwa na sasa imesajiliwa kwenye rekodi ya umma.`, ...(d.note ? [`Ujumbe kutoka timu ya Legitfy:\n${d.note}`] : []), "Ili kuanza:"],
       steps: ["Ingia kwa akaunti uliyotumia kuomba.", "Kagua wasifu wa taasisi na muhuri wa cheti.", "Ongeza wafanyakazi watakaofanya kazi nawe.", "Unda cheti chako cha kwanza."],
       action: "Ingia kwenye Legitfy",
     }),
@@ -107,6 +128,16 @@ const MESSAGES: Record<Locale, Record<EmailKind, (d: EmailData) => Message>> = {
     }),
   },
   zh: {
+    platformNewApplication: (d) => ({
+      subject: `新申请：${d.institution}`,
+      lines: [`${d.institution}（${d.place}）已申请加入 Legitfy。`, "暂时无需决定：申请人还需上传由机构负责人签署的信函。信函到达后我们会再次发邮件通知您。"],
+      action: "打开申请",
+    }),
+    platformLetterUploaded: (d) => ({
+      subject: `待审核：${d.institution}`,
+      lines: [`${d.institution}（${d.place}）已上传签署的信函。该申请已可供您决定。`],
+      action: "审核申请",
+    }),
     applicationReceived: (d) => ({
       subject: `我们已收到 ${d.institution} 的申请`,
       lines: [`${d.name}，您好：`, `感谢您为 ${d.institution} 申请加入 Legitfy。`, "下一步，请机构负责人签署任命函并加盖公章。您可以通过跟踪链接下载任命函、在签署后上传，并查看申请进度。"],
@@ -114,7 +145,7 @@ const MESSAGES: Record<Locale, Record<EmailKind, (d: EmailData) => Message>> = {
     }),
     applicationApproved: (d) => ({
       subject: `欢迎加入 Legitfy，${d.institution}`,
-      lines: [`${d.name}，您好：`, `好消息：${d.institution} 已获批准，现已在公开记录中注册。`, "开始使用："],
+      lines: [`${d.name}，您好：`, `好消息：${d.institution} 已获批准，现已在公开记录中注册。`, ...(d.note ? [`Legitfy 团队留言：\n${d.note}`] : []), "开始使用："],
       steps: ["使用申请时的钱包登录。", "检查机构资料和证书印章。", "添加与您共同工作的员工。", "创建您的第一份证书。"],
       action: "登录 Legitfy",
     }),
