@@ -1,0 +1,735 @@
+{
+ "classHash": "0x5fe0538c6e534d626ecf0a5b7f7c7a4cf13944086952ca8a1643f330bc66def",
+ "abi": [
+  {
+   "type": "impl",
+   "name": "RegistryImpl",
+   "interface_name": "legitify_starknet::registry::ILegitifyRegistry"
+  },
+  {
+   "type": "struct",
+   "name": "core::byte_array::ByteArray",
+   "members": [
+    {
+     "name": "data",
+     "type": "core::array::Array::<core::bytes_31::bytes31>"
+    },
+    {
+     "name": "pending_word",
+     "type": "core::felt252"
+    },
+    {
+     "name": "pending_word_len",
+     "type": "core::internal::bounded_int::BoundedInt::<0, 30>"
+    }
+   ]
+  },
+  {
+   "type": "struct",
+   "name": "core::integer::u256",
+   "members": [
+    {
+     "name": "low",
+     "type": "core::integer::u128"
+    },
+    {
+     "name": "high",
+     "type": "core::integer::u128"
+    }
+   ]
+  },
+  {
+   "type": "struct",
+   "name": "legitify_starknet::registry::IssueParams",
+   "members": [
+    {
+     "name": "credential_id",
+     "type": "core::integer::u256"
+    },
+    {
+     "name": "file_hash",
+     "type": "core::integer::u256"
+    }
+   ]
+  },
+  {
+   "type": "struct",
+   "name": "legitify_starknet::registry::Credential",
+   "members": [
+    {
+     "name": "issuer",
+     "type": "core::starknet::contract_address::ContractAddress"
+    },
+    {
+     "name": "institution_id",
+     "type": "core::integer::u32"
+    },
+    {
+     "name": "issued_at",
+     "type": "core::integer::u64"
+    },
+    {
+     "name": "revocation_reason",
+     "type": "core::integer::u8"
+    },
+    {
+     "name": "revoked_at",
+     "type": "core::integer::u64"
+    },
+    {
+     "name": "file_hash",
+     "type": "core::integer::u256"
+    },
+    {
+     "name": "replaced_by",
+     "type": "core::integer::u256"
+    }
+   ]
+  },
+  {
+   "type": "struct",
+   "name": "legitify_starknet::registry::Verification",
+   "members": [
+    {
+     "name": "status",
+     "type": "core::integer::u8"
+    },
+    {
+     "name": "credential_id",
+     "type": "core::integer::u256"
+    },
+    {
+     "name": "institution_name",
+     "type": "core::byte_array::ByteArray"
+    },
+    {
+     "name": "credential",
+     "type": "legitify_starknet::registry::Credential"
+    }
+   ]
+  },
+  {
+   "type": "struct",
+   "name": "legitify_starknet::registry::Institution",
+   "members": [
+    {
+     "name": "admin",
+     "type": "core::starknet::contract_address::ContractAddress"
+    },
+    {
+     "name": "status",
+     "type": "core::integer::u8"
+    },
+    {
+     "name": "name",
+     "type": "core::byte_array::ByteArray"
+    }
+   ]
+  },
+  {
+   "type": "struct",
+   "name": "legitify_starknet::registry::Member",
+   "members": [
+    {
+     "name": "institution_id",
+     "type": "core::integer::u32"
+    },
+    {
+     "name": "role",
+     "type": "core::integer::u8"
+    }
+   ]
+  },
+  {
+   "type": "enum",
+   "name": "core::bool",
+   "variants": [
+    {
+     "name": "False",
+     "type": "()"
+    },
+    {
+     "name": "True",
+     "type": "()"
+    }
+   ]
+  },
+  {
+   "type": "interface",
+   "name": "legitify_starknet::registry::ILegitifyRegistry",
+   "items": [
+    {
+     "type": "function",
+     "name": "register_institution",
+     "inputs": [
+      {
+       "name": "name",
+       "type": "core::byte_array::ByteArray"
+      },
+      {
+       "name": "admin",
+       "type": "core::starknet::contract_address::ContractAddress"
+      }
+     ],
+     "outputs": [
+      {
+       "type": "core::integer::u32"
+      }
+     ],
+     "state_mutability": "external"
+    },
+    {
+     "type": "function",
+     "name": "set_institution_status",
+     "inputs": [
+      {
+       "name": "institution_id",
+       "type": "core::integer::u32"
+      },
+      {
+       "name": "status",
+       "type": "core::integer::u8"
+      }
+     ],
+     "outputs": [],
+     "state_mutability": "external"
+    },
+    {
+     "type": "function",
+     "name": "set_institution_admin",
+     "inputs": [
+      {
+       "name": "institution_id",
+       "type": "core::integer::u32"
+      },
+      {
+       "name": "new_admin",
+       "type": "core::starknet::contract_address::ContractAddress"
+      }
+     ],
+     "outputs": [],
+     "state_mutability": "external"
+    },
+    {
+     "type": "function",
+     "name": "transfer_ownership",
+     "inputs": [
+      {
+       "name": "new_owner",
+       "type": "core::starknet::contract_address::ContractAddress"
+      }
+     ],
+     "outputs": [],
+     "state_mutability": "external"
+    },
+    {
+     "type": "function",
+     "name": "accept_ownership",
+     "inputs": [],
+     "outputs": [],
+     "state_mutability": "external"
+    },
+    {
+     "type": "function",
+     "name": "add_operator",
+     "inputs": [
+      {
+       "name": "account",
+       "type": "core::starknet::contract_address::ContractAddress"
+      }
+     ],
+     "outputs": [],
+     "state_mutability": "external"
+    },
+    {
+     "type": "function",
+     "name": "remove_operator",
+     "inputs": [
+      {
+       "name": "account",
+       "type": "core::starknet::contract_address::ContractAddress"
+      }
+     ],
+     "outputs": [],
+     "state_mutability": "external"
+    },
+    {
+     "type": "function",
+     "name": "issue",
+     "inputs": [
+      {
+       "name": "credential_id",
+       "type": "core::integer::u256"
+      },
+      {
+       "name": "file_hash",
+       "type": "core::integer::u256"
+      }
+     ],
+     "outputs": [],
+     "state_mutability": "external"
+    },
+    {
+     "type": "function",
+     "name": "issue_batch",
+     "inputs": [
+      {
+       "name": "items",
+       "type": "core::array::Array::<legitify_starknet::registry::IssueParams>"
+      }
+     ],
+     "outputs": [],
+     "state_mutability": "external"
+    },
+    {
+     "type": "function",
+     "name": "revoke",
+     "inputs": [
+      {
+       "name": "credential_id",
+       "type": "core::integer::u256"
+      },
+      {
+       "name": "reason",
+       "type": "core::integer::u8"
+      }
+     ],
+     "outputs": [],
+     "state_mutability": "external"
+    },
+    {
+     "type": "function",
+     "name": "supersede",
+     "inputs": [
+      {
+       "name": "credential_id",
+       "type": "core::integer::u256"
+      },
+      {
+       "name": "new_credential_id",
+       "type": "core::integer::u256"
+      },
+      {
+       "name": "new_file_hash",
+       "type": "core::integer::u256"
+      }
+     ],
+     "outputs": [],
+     "state_mutability": "external"
+    },
+    {
+     "type": "function",
+     "name": "verify_by_id",
+     "inputs": [
+      {
+       "name": "credential_id",
+       "type": "core::integer::u256"
+      }
+     ],
+     "outputs": [
+      {
+       "type": "legitify_starknet::registry::Verification"
+      }
+     ],
+     "state_mutability": "view"
+    },
+    {
+     "type": "function",
+     "name": "verify_by_hash",
+     "inputs": [
+      {
+       "name": "file_hash",
+       "type": "core::integer::u256"
+      }
+     ],
+     "outputs": [
+      {
+       "type": "legitify_starknet::registry::Verification"
+      }
+     ],
+     "state_mutability": "view"
+    },
+    {
+     "type": "function",
+     "name": "credential_id_by_hash",
+     "inputs": [
+      {
+       "name": "file_hash",
+       "type": "core::integer::u256"
+      }
+     ],
+     "outputs": [
+      {
+       "type": "core::integer::u256"
+      }
+     ],
+     "state_mutability": "view"
+    },
+    {
+     "type": "function",
+     "name": "get_institution",
+     "inputs": [
+      {
+       "name": "institution_id",
+       "type": "core::integer::u32"
+      }
+     ],
+     "outputs": [
+      {
+       "type": "legitify_starknet::registry::Institution"
+      }
+     ],
+     "state_mutability": "view"
+    },
+    {
+     "type": "function",
+     "name": "get_member",
+     "inputs": [
+      {
+       "name": "account",
+       "type": "core::starknet::contract_address::ContractAddress"
+      }
+     ],
+     "outputs": [
+      {
+       "type": "legitify_starknet::registry::Member"
+      }
+     ],
+     "state_mutability": "view"
+    },
+    {
+     "type": "function",
+     "name": "can_issue",
+     "inputs": [
+      {
+       "name": "account",
+       "type": "core::starknet::contract_address::ContractAddress"
+      }
+     ],
+     "outputs": [
+      {
+       "type": "core::bool"
+      }
+     ],
+     "state_mutability": "view"
+    },
+    {
+     "type": "function",
+     "name": "institution_count",
+     "inputs": [],
+     "outputs": [
+      {
+       "type": "core::integer::u32"
+      }
+     ],
+     "state_mutability": "view"
+    },
+    {
+     "type": "function",
+     "name": "credential_count",
+     "inputs": [],
+     "outputs": [
+      {
+       "type": "core::integer::u256"
+      }
+     ],
+     "state_mutability": "view"
+    },
+    {
+     "type": "function",
+     "name": "owner",
+     "inputs": [],
+     "outputs": [
+      {
+       "type": "core::starknet::contract_address::ContractAddress"
+      }
+     ],
+     "state_mutability": "view"
+    },
+    {
+     "type": "function",
+     "name": "pending_owner",
+     "inputs": [],
+     "outputs": [
+      {
+       "type": "core::starknet::contract_address::ContractAddress"
+      }
+     ],
+     "state_mutability": "view"
+    }
+   ]
+  },
+  {
+   "type": "constructor",
+   "name": "constructor",
+   "inputs": [
+    {
+     "name": "initial_owner",
+     "type": "core::starknet::contract_address::ContractAddress"
+    }
+   ]
+  },
+  {
+   "type": "event",
+   "name": "legitify_starknet::registry::LegitifyRegistry::OwnershipTransferStarted",
+   "kind": "struct",
+   "members": [
+    {
+     "name": "previous_owner",
+     "type": "core::starknet::contract_address::ContractAddress",
+     "kind": "key"
+    },
+    {
+     "name": "new_owner",
+     "type": "core::starknet::contract_address::ContractAddress",
+     "kind": "key"
+    }
+   ]
+  },
+  {
+   "type": "event",
+   "name": "legitify_starknet::registry::LegitifyRegistry::OwnershipTransferred",
+   "kind": "struct",
+   "members": [
+    {
+     "name": "previous_owner",
+     "type": "core::starknet::contract_address::ContractAddress",
+     "kind": "key"
+    },
+    {
+     "name": "new_owner",
+     "type": "core::starknet::contract_address::ContractAddress",
+     "kind": "key"
+    }
+   ]
+  },
+  {
+   "type": "event",
+   "name": "legitify_starknet::registry::LegitifyRegistry::InstitutionRegistered",
+   "kind": "struct",
+   "members": [
+    {
+     "name": "institution_id",
+     "type": "core::integer::u32",
+     "kind": "key"
+    },
+    {
+     "name": "admin",
+     "type": "core::starknet::contract_address::ContractAddress",
+     "kind": "key"
+    },
+    {
+     "name": "name",
+     "type": "core::byte_array::ByteArray",
+     "kind": "data"
+    }
+   ]
+  },
+  {
+   "type": "event",
+   "name": "legitify_starknet::registry::LegitifyRegistry::InstitutionStatusChanged",
+   "kind": "struct",
+   "members": [
+    {
+     "name": "institution_id",
+     "type": "core::integer::u32",
+     "kind": "key"
+    },
+    {
+     "name": "status",
+     "type": "core::integer::u8",
+     "kind": "data"
+    }
+   ]
+  },
+  {
+   "type": "event",
+   "name": "legitify_starknet::registry::LegitifyRegistry::InstitutionAdminChanged",
+   "kind": "struct",
+   "members": [
+    {
+     "name": "institution_id",
+     "type": "core::integer::u32",
+     "kind": "key"
+    },
+    {
+     "name": "previous_admin",
+     "type": "core::starknet::contract_address::ContractAddress",
+     "kind": "key"
+    },
+    {
+     "name": "new_admin",
+     "type": "core::starknet::contract_address::ContractAddress",
+     "kind": "key"
+    }
+   ]
+  },
+  {
+   "type": "event",
+   "name": "legitify_starknet::registry::LegitifyRegistry::OperatorAdded",
+   "kind": "struct",
+   "members": [
+    {
+     "name": "institution_id",
+     "type": "core::integer::u32",
+     "kind": "key"
+    },
+    {
+     "name": "account",
+     "type": "core::starknet::contract_address::ContractAddress",
+     "kind": "key"
+    }
+   ]
+  },
+  {
+   "type": "event",
+   "name": "legitify_starknet::registry::LegitifyRegistry::OperatorRemoved",
+   "kind": "struct",
+   "members": [
+    {
+     "name": "institution_id",
+     "type": "core::integer::u32",
+     "kind": "key"
+    },
+    {
+     "name": "account",
+     "type": "core::starknet::contract_address::ContractAddress",
+     "kind": "key"
+    }
+   ]
+  },
+  {
+   "type": "event",
+   "name": "legitify_starknet::registry::LegitifyRegistry::CredentialIssued",
+   "kind": "struct",
+   "members": [
+    {
+     "name": "credential_id",
+     "type": "core::integer::u256",
+     "kind": "key"
+    },
+    {
+     "name": "institution_id",
+     "type": "core::integer::u32",
+     "kind": "key"
+    },
+    {
+     "name": "issuer",
+     "type": "core::starknet::contract_address::ContractAddress",
+     "kind": "key"
+    },
+    {
+     "name": "file_hash",
+     "type": "core::integer::u256",
+     "kind": "data"
+    }
+   ]
+  },
+  {
+   "type": "event",
+   "name": "legitify_starknet::registry::LegitifyRegistry::CredentialRevoked",
+   "kind": "struct",
+   "members": [
+    {
+     "name": "credential_id",
+     "type": "core::integer::u256",
+     "kind": "key"
+    },
+    {
+     "name": "institution_id",
+     "type": "core::integer::u32",
+     "kind": "key"
+    },
+    {
+     "name": "by",
+     "type": "core::starknet::contract_address::ContractAddress",
+     "kind": "key"
+    },
+    {
+     "name": "reason",
+     "type": "core::integer::u8",
+     "kind": "data"
+    }
+   ]
+  },
+  {
+   "type": "event",
+   "name": "legitify_starknet::registry::LegitifyRegistry::CredentialSuperseded",
+   "kind": "struct",
+   "members": [
+    {
+     "name": "credential_id",
+     "type": "core::integer::u256",
+     "kind": "key"
+    },
+    {
+     "name": "replaced_by",
+     "type": "core::integer::u256",
+     "kind": "key"
+    },
+    {
+     "name": "institution_id",
+     "type": "core::integer::u32",
+     "kind": "key"
+    }
+   ]
+  },
+  {
+   "type": "event",
+   "name": "legitify_starknet::registry::LegitifyRegistry::Event",
+   "kind": "enum",
+   "variants": [
+    {
+     "name": "OwnershipTransferStarted",
+     "type": "legitify_starknet::registry::LegitifyRegistry::OwnershipTransferStarted",
+     "kind": "nested"
+    },
+    {
+     "name": "OwnershipTransferred",
+     "type": "legitify_starknet::registry::LegitifyRegistry::OwnershipTransferred",
+     "kind": "nested"
+    },
+    {
+     "name": "InstitutionRegistered",
+     "type": "legitify_starknet::registry::LegitifyRegistry::InstitutionRegistered",
+     "kind": "nested"
+    },
+    {
+     "name": "InstitutionStatusChanged",
+     "type": "legitify_starknet::registry::LegitifyRegistry::InstitutionStatusChanged",
+     "kind": "nested"
+    },
+    {
+     "name": "InstitutionAdminChanged",
+     "type": "legitify_starknet::registry::LegitifyRegistry::InstitutionAdminChanged",
+     "kind": "nested"
+    },
+    {
+     "name": "OperatorAdded",
+     "type": "legitify_starknet::registry::LegitifyRegistry::OperatorAdded",
+     "kind": "nested"
+    },
+    {
+     "name": "OperatorRemoved",
+     "type": "legitify_starknet::registry::LegitifyRegistry::OperatorRemoved",
+     "kind": "nested"
+    },
+    {
+     "name": "CredentialIssued",
+     "type": "legitify_starknet::registry::LegitifyRegistry::CredentialIssued",
+     "kind": "nested"
+    },
+    {
+     "name": "CredentialRevoked",
+     "type": "legitify_starknet::registry::LegitifyRegistry::CredentialRevoked",
+     "kind": "nested"
+    },
+    {
+     "name": "CredentialSuperseded",
+     "type": "legitify_starknet::registry::LegitifyRegistry::CredentialSuperseded",
+     "kind": "nested"
+    }
+   ]
+  }
+ ]
+}

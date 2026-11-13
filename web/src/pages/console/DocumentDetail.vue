@@ -9,6 +9,8 @@ import { api } from "../../lib/api";
 import { longDate, statusLabel } from "../../lib/certificate";
 import { dateLocale, t } from "../../lib/i18n";
 import { canWrite, issue } from "../../lib/wallet";
+import { starknetNetwork } from "../../lib/config";
+import { issueOnStarknet, starknetWallets, type StarknetWallet } from "../../lib/starknetWallet";
 import type { Hex } from "viem";
 
 interface Share { id: string; recipient: string; comment: string; shared_by: string; expires_at: string; revoked_at: string | null; created_at: string }
@@ -62,6 +64,17 @@ async function publish() {
   });
   publishing.value = false;
 }
+/** Read when the page opens: wallets inject themselves as the page loads. */
+const wallets = ref<StarknetWallet[]>([]);
+onMounted(() => (wallets.value = starknetNetwork ? starknetWallets() : []));
+async function publishOnStarknet(wallet: StarknetWallet) {
+  publishing.value = true;
+  await attempt(async () => {
+    await issueOnStarknet(wallet, id as Hex, hash.value);
+    await load();
+  });
+  publishing.value = false;
+}
 function startShare() {
   Object.assign(share, { recipient: "", comment: "", expiresInDays: 14 });
   link.value = "";
@@ -107,7 +120,13 @@ const stamp = (d: string) => new Date(d).toLocaleString(dateLocale(), { dateStyl
           <button class="btn" @click="download"><Download class="size-4" aria-hidden="true" />{{ t(doc.sealed ? "document.download" : "document.downloadPlain") }}</button>
           <button class="btn" @click="startShare"><Share2 class="size-4" aria-hidden="true" />{{ t("document.share") }}</button>
           <button v-if="doc.status === 'pending' && canWrite()" class="btn" :disabled="publishing" @click="publish"><UploadCloud class="size-4" aria-hidden="true" />{{ publishing ? t("common.waitingWallet") : t("document.publish") }}</button>
+          <template v-if="doc.status === 'pending' && starknetNetwork">
+            <button v-for="w in wallets" :key="w.id" class="btn btn-quiet" :disabled="publishing" @click="publishOnStarknet(w)">
+              <UploadCloud class="size-4" aria-hidden="true" />{{ publishing ? t("common.waitingWallet") : t("starknet.publish", { network: starknetNetwork.name, wallet: w.name }) }}
+            </button>
+          </template>
         </div>
+        <p v-if="doc.status === 'pending' && starknetNetwork && wallets.length === 0" class="mt-3 max-w-prose text-sm text-ink-soft">{{ t("starknet.noWallet", { network: starknetNetwork.name }) }}</p>
         <p class="mt-3 max-w-prose text-sm text-ink-soft">{{ t(doc.sealed ? "document.stampedNote" : "document.unsealedNote") }}</p>
         <p v-if="doc.status === 'pending'" class="mt-3 max-w-prose text-sm text-ink-soft">{{ canWrite() ? t("document.pending") : t("errors.smartAccount") }}</p>
       </div>

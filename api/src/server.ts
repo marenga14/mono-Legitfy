@@ -8,6 +8,7 @@ import { resendMailer } from "./mail.js";
 import { createApp, runSlaSweep, savedNetwork, syncInstitutions } from "./app.js";
 import { viemChain } from "./chain.js";
 import { loadConfig } from "./config.js";
+import { starknetReader } from "./starknet.js";
 import { openDb, openPostgres } from "./db.js";
 
 const config = loadConfig();
@@ -24,6 +25,7 @@ if (saved.rpcUrl && saved.registry) chain.useNetwork(saved.rpcUrl, saved.registr
 const app = createApp({
   db,
   chain,
+  starknet: starknetReader(),
   triager: config.ANTHROPIC_API_KEY ? claudeTriager(new Anthropic()) : null,
   sessionSecret: config.SESSION_SECRET,
   fileMasterKey: config.FILE_MASTER_KEY,

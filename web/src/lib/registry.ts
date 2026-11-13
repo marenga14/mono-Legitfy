@@ -34,18 +34,28 @@ const ZERO = `0x${"0".repeat(64)}`;
 export const client = createPublicClient({ chain, transport: http() });
 const toDate = (s: number) => (s ? new Date(s * 1000) : null);
 
-interface Target { client: typeof client; address: Address; network: string; explorer: string }
-const targets = (): Target[] => [
-  { client, address: contract().address, network: networkName, explorer: explorerUrl },
-  ...otherNetworks.map((n) => ({
-    client: createPublicClient({ transport: http(n.rpcUrl) }) as typeof client, address: n.registry, network: n.name, explorer: n.explorerUrl,
-  })),
-];
-
-function toVerdict(target: Target, v: {
+type RawRecord = {
   status: number; credentialId: Hex; institutionName: string;
   credential: { issuedAt: number; revokedAt: number; revocationReason: number; replacedBy: Hex; fileHash: Hex };
-}): Verdict {
+};
+interface Target { network: string; recordUrl: string; read(by: "id" | "hash", value: Hex): Promise<RawRecord> }
+const evmTarget = (c: typeof client, address: Address, network: string, explorer: string): Target => ({
+  network,
+  recordUrl: `${explorer}/address/${address}`,
+  read: (by, value) => c.readContract({ address, abi, functionName: by === "id" ? "verifyById" : "verifyByHash", args: [value] }),
+});
+const targets = (): Target[] => [
+  evmTarget(client, contract().address, networkName, explorerUrl),
+  ...otherNetworks.map((n): Target => n.kind === "starknet"
+    ? {
+      network: n.name,
+      recordUrl: `${n.explorerUrl}/contract/${n.registry}`,
+      read: async (by, value) => (await import("./starknetRegistry")).readRecord(n.rpcUrl, n.registry, by, value),
+    }
+    : evmTarget(createPublicClient({ transport: http(n.rpcUrl) }) as typeof client, n.registry as Address, n.name, n.explorerUrl)),
+];
+
+function toVerdict(target: Target, v: RawRecord): Verdict {
   const c = v.credential;
   return {
     status: STATUSES[v.status] ?? "not_found",
@@ -57,7 +67,7 @@ function toVerdict(target: Target, v: {
     replacedBy: c.replacedBy === ZERO ? null : c.replacedBy,
     fileHash: c.fileHash,
     network: target.network,
-    recordUrl: `${target.explorer}/address/${target.address}`,
+    recordUrl: target.recordUrl,
   };
 }
 
@@ -71,9 +81,8 @@ const contract = () => {
  * Searches every listed network. "No record" is only an answer if each one replied: an unreachable
  * network could hold the record, so that case fails instead of telling someone a real file is missing.
  */
-async function search(functionName: "verifyByHash" | "verifyById", value: Hex): Promise<Verdict> {
-  const results = await Promise.allSettled(targets().map(async (target) =>
-    toVerdict(target, await target.client.readContract({ address: target.address, abi, functionName, args: [value] }))));
+async function search(by: "id" | "hash", value: Hex): Promise<Verdict> {
+  const results = await Promise.allSettled(targets().map(async (target) => toVerdict(target, await target.read(by, value))));
   const answers = results.flatMap((r) => (r.status === "fulfilled" ? [r.value] : []));
   const found = answers.find((v) => v.status !== "not_found");
   if (found) return found;
@@ -81,8 +90,8 @@ async function search(functionName: "verifyByHash" | "verifyById", value: Hex): 
   if (failed) throw failed.reason;
   return answers[0]!;
 }
-export const verifyByHash = (hash: Hex) => search("verifyByHash", hash);
-export const verifyById = (id: Hex) => search("verifyById", id);
+export const verifyByHash = (hash: Hex) => search("hash", hash);
+export const verifyById = (id: Hex) => search("id", id);
 export const isCredentialId = (v: string): v is Hex => isHex(v) && v.length === 66;
 /** Takes a printed code or a full on-chain ID, which older links still use. */
 export function resolveCredential(input: string): { id: Hex; code: string | null } | null {

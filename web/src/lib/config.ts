@@ -9,11 +9,13 @@ const env = import.meta.env;
 export const apiUrl: string = env.VITE_API_URL ?? "http://localhost:8787";
 
 interface Network { name: string; chainId: number; rpcUrl: string; explorerUrl: string; registry: string; hasLogo?: boolean }
+/** Starknet chain IDs are short strings ("SN_MAIN"); EVM ones are numbers. */
+interface ListedNetwork extends Omit<Network, "chainId"> { kind?: "evm" | "starknet"; chainId: number | string }
 /**
  * The platform admin can update these after deployment, so they're read when the page loads.
  * Public checks don't otherwise need the API, so a slow or missing API must not stop them.
  */
-const live: Partial<Network> & { others?: Network[] } = await fetch(`${apiUrl}/network`, { signal: AbortSignal.timeout(2500) })
+const live: Partial<Network> & { others?: ListedNetwork[] } = await fetch(`${apiUrl}/network`, { signal: AbortSignal.timeout(2500) })
   .then((r) => (r.ok ? r.json() : {}))
   .catch(() => ({}));
 
@@ -34,11 +36,15 @@ export const contactEmail: string = env.VITE_CONTACT_EMAIL || "marengajulius@gma
 export const supportEmail: string = env.VITE_SUPPORT_EMAIL || "support@legitfy.dev";
 export const registryAddress = (live.registry || env.VITE_REGISTRY_ADDRESS || undefined) as Address | undefined;
 
-const logoFor = (n: { chainId: number; hasLogo?: boolean }) => (n.hasLogo ? `${apiUrl}/networks/${n.chainId}/logo` : null);
+const logoFor = (n: { chainId: number | string; hasLogo?: boolean }) => (n.hasLogo ? `${apiUrl}/networks/${n.chainId}/logo` : null);
 
-export interface SearchedNetwork { name: string; chainId: number; rpcUrl: string; explorerUrl: string; registry: Address; logo: string | null }
+export interface SearchedNetwork {
+  kind: "evm" | "starknet"; name: string; chainId: number | string; rpcUrl: string; explorerUrl: string; registry: string; logo: string | null;
+}
 /** Other networks public checks search. Each was confirmed to hold our registry when it was added. */
-export const otherNetworks: SearchedNetwork[] = (live.others ?? []).map((n) => ({ ...n, registry: n.registry as Address, logo: logoFor(n) }));
+export const otherNetworks: SearchedNetwork[] = (live.others ?? []).map((n) => ({ ...n, kind: n.kind ?? "evm", logo: logoFor(n) }));
+/** Where institutions can also publish with a Starknet wallet. The first one listed, if any. */
+export const starknetNetwork = otherNetworks.find((n) => n.kind === "starknet");
 /** BOT Chain's own logo, from botchain.ai. A network without an uploaded logo shows its name only. */
 const mainLogo = logoFor({ chainId, hasLogo: live.hasLogo }) ?? (isDevChain || network ? "/chains/bot-chain.png" : null);
 export const shownNetworks: { name: string; explorerUrl: string; logo: string | null }[] = [

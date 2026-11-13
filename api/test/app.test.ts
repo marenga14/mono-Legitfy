@@ -13,6 +13,7 @@ import { appendAudit, dailyRoot, verifyAuditChain } from "../src/audit.js";
 import { createApp, runSlaSweep, syncInstitutions, type Deps } from "../src/app.js";
 import type { Chain, Member, RegistryMatch } from "../src/chain.js";
 import { openDb, openPostgres, type Db } from "../src/db.js";
+import { REGISTRY_CLASS_HASHES, decodeVerification } from "../src/starknet.js";
 
 const PDF = "%PDF-1.7 confidential certificate of Asha";
 const accountFor = (owner: string) => `0xacc${owner.slice(5).toLowerCase()}` as Address;
@@ -56,6 +57,7 @@ let triager: ReturnType<typeof vi.fn<Triager>>;
 let deps: Deps;
 let probe: () => { chainId: number; owner: Address };
 let networkUsed: [string, Address][];
+let starknetProbe: () => { chainId: string; classHash: string; owner: string };
 let app: ReturnType<typeof createApp>;
 let dataDir: string;
 
@@ -107,6 +109,15 @@ beforeEach(async () => {
       if (mailDown) throw new Error("provider down");
       sent.push(email);
     },
+  };
+  starknetProbe = () => ({ chainId: "SN_MAIN", classHash: REGISTRY_CLASS_HASHES[0]!, owner: "0x5ea1" });
+  deps.starknet = {
+    verify: async (by, value, target) => {
+      lookups.push([by, value, target.rpcUrl]);
+      if (lookupFails(target.rpcUrl)) throw new Error("rpc down");
+      return record(target.rpcUrl);
+    },
+    probe: async () => starknetProbe(),
   };
   app = createApp(deps);
 });
@@ -628,7 +639,7 @@ describe("listed networks", () => {
     expect(await others()).toEqual([]);
     probe = () => ({ chainId: 8453, owner: platformKey.address });
     expect((await add(token)).status).toBe(201);
-    expect(await others()).toEqual([{ ...BASE, hasLogo: false }]);
+    expect(await others()).toEqual([{ ...BASE, kind: "evm", hasLogo: false }]);
     expect(networkUsed).toEqual([]); // Listing one never moves the API off its main network.
   });
   it("refuses duplicates, including the main network", async () => {
@@ -666,6 +677,81 @@ describe("listed networks", () => {
   it("leaves the list alone for anyone else", async () => {
     const staff = await login(uniAAdmin);
     expect((await add(staff.token)).status).toBe(403);
+  });
+});
+
+describe("Starknet networks", () => {
+  const STARKNET = {
+    kind: "starknet", name: "Starknet", chainId: "SN_MAIN", rpcUrl: "https://starknet.example",
+    explorerUrl: "https://voyager.online", registry: `0x0${"4".repeat(63)}`,
+  };
+  const add = (token: string, body: unknown = STARKNET) => app.request("/platform/networks", authed(token, body));
+  const others = async () => (await (await app.request("/network")).json()).others;
+  const FOUND = { ...NOT_FOUND, status: "authentic", institution: "University A" } as Verification;
+
+  it("lists Starknet only when this repo's registry answers on the stated chain", async () => {
+    const { token } = await login(platformKey);
+    expect((await add(token, { ...STARKNET, chainId: "SN_GOERLI" })).status).toBe(400);
+    expect((await add(token, { ...STARKNET, registry: "not-an-address" })).status).toBe(400);
+    starknetProbe = () => { throw new Error("no contract"); };
+    expect((await add(token)).status).toBe(422);
+    starknetProbe = () => ({ chainId: "SN_SEPOLIA", classHash: REGISTRY_CLASS_HASHES[0]!, owner: "0x5ea1" });
+    expect((await add(token)).status).toBe(422);
+    starknetProbe = () => ({ chainId: "SN_MAIN", classHash: "0x1234", owner: "0x5ea1" });
+    expect((await add(token)).status).toBe(422);
+    expect(await others()).toEqual([]);
+    starknetProbe = () => ({ chainId: "SN_MAIN", classHash: REGISTRY_CLASS_HASHES[0]!, owner: "0x5ea1" });
+    expect((await add(token)).status).toBe(201);
+    expect(await others()).toEqual([{ ...STARKNET, hasLogo: false }]);
+    expect((await add(token)).status).toBe(409);
+    expect(networkUsed).toEqual([]);
+  });
+  it("can't be listed when the API has no Starknet reader", async () => {
+    app = createApp({ ...deps, starknet: undefined });
+    const { token } = await login(platformKey);
+    expect((await add(token)).status).toBe(422);
+  });
+  it("takes a logo and is removed by its chain name", async () => {
+    const { token } = await login(platformKey);
+    await add(token);
+    const form = new FormData();
+    form.set("file", new File([Buffer.from("89504e470d0a1a0a0000", "hex")], "logo.png"));
+    const upload = await app.request("/platform/networks/SN_MAIN/logo", { method: "POST", headers: { authorization: `Bearer ${token}` }, body: form });
+    expect(upload.status).toBe(200);
+    expect((await app.request("/networks/SN_MAIN/logo")).headers.get("content-type")).toBe("image/png");
+    expect((await app.request("/networks/SN_NOPE/logo")).status).toBe(404);
+    expect((await app.request("/platform/networks/SN_MAIN", { ...authed(token), method: "DELETE" })).status).toBe(200);
+    expect(await others()).toEqual([]);
+  });
+  it("is searched by public checks, and a silent Starknet blocks a not_found answer", async () => {
+    const { token } = await login(platformKey);
+    await add(token);
+    record = (rpc) => (rpc === STARKNET.rpcUrl ? FOUND : NOT_FOUND);
+    expect(await (await app.request("/public/verify/UD-26-7K4Q9-XPM2C")).json()).toMatchObject({ status: "authentic", network: "Starknet" });
+    expect(lookups).toContainEqual(["id", credentialIdFor("UD-26-7K4Q9-XPM2C"), STARKNET.rpcUrl]);
+    record = () => NOT_FOUND;
+    lookupFails = (rpc) => rpc === STARKNET.rpcUrl;
+    expect((await app.request("/public/verify/UD-26-7K4Q9-XPM2C")).status).toBe(503);
+  });
+  it("shows a document published on Starknet as published in the console", async () => {
+    const platform = await login(platformKey);
+    await add(platform.token);
+    const { token } = await login(uniA);
+    await createCredential(token);
+    record = (rpc) => (rpc === STARKNET.rpcUrl ? FOUND : NOT_FOUND);
+    const [row] = await (await app.request("/credentials", authed(token))).json();
+    expect(row.status).toBe("authentic");
+  });
+  it("decodes the registry's answer into the shape EVM networks use", () => {
+    const v = decodeVerification({
+      status: 2n, credential_id: 0xc0den, institution_name: "University A",
+      credential: { issued_at: 1_750_000_000n, revoked_at: 1_750_000_060n, revocation_reason: 2n, replaced_by: 0n, file_hash: 0xf11en },
+    });
+    expect(v).toEqual({
+      status: "revoked", credentialId: `0x${"c0de".padStart(64, "0")}`, institution: "University A",
+      issuedAt: "2025-06-15T15:06:40.000Z", revokedAt: "2025-06-15T15:07:40.000Z", revocationReason: "fraud",
+      replacedBy: null, fileHash: `0x${"f11e".padStart(64, "0")}`,
+    });
   });
 });
 
@@ -1040,7 +1126,7 @@ describe("credentials and share links", () => {
     expect((await createCredential(token)).status).toBe(201);
     const [row] = await (await app.request("/credentials", authed(token))).json();
     expect(row).toMatchObject({ owner_name: "Asha M", status: "pending" });
-    match = { status: "authentic", institutionName: "University A", institutionId: 1 };
+    record = () => ({ ...NOT_FOUND, status: "authentic", institution: "University A" });
     const [after] = await (await app.request("/credentials", authed(token))).json();
     expect(after.status).toBe("authentic");
     const dir = path.join(dataDir, "files");

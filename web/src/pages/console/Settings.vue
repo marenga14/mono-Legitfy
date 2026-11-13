@@ -39,10 +39,12 @@ async function toggleListing() {
 
 const network = reactive({ name: "", chainId: 0, rpcUrl: "", explorerUrl: "", registry: "" });
 const saving = ref(false);
-interface Listed { name: string; chainId: number; hasLogo: boolean }
+interface Listed { name: string; chainId: number | string; hasLogo: boolean }
 const listed = ref<Listed[]>([]);
 const mainChain = ref<Listed | null>(null);
-const added = reactive({ name: "", chainId: 0, rpcUrl: "", explorerUrl: "", registry: "" });
+/** Starknet isn't EVM: it names its chains and its addresses are longer. */
+const added = reactive({ kind: "evm" as "evm" | "starknet", name: "", chainId: 0 as number | string, rpcUrl: "", explorerUrl: "", registry: "" });
+watch(() => added.kind, (kind) => (added.chainId = kind === "starknet" ? "SN_MAIN" : 0));
 const addedLogo = ref<File>();
 const adding = ref(false);
 
@@ -52,12 +54,12 @@ async function loadNetworks() {
   mainChain.value = n;
   listed.value = n.others;
 }
-const uploadNetworkLogo = (chainId: number, file: File) => {
+const uploadNetworkLogo = (chainId: number | string, file: File) => {
   const body = new FormData();
   body.set("file", file);
   return api(`/platform/networks/${chainId}/logo`, { method: "POST", body });
 };
-async function changeLogo(chainId: number, e: Event) {
+async function changeLogo(chainId: number | string, e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0];
   if (!file) return;
   error.value = "";
@@ -80,7 +82,7 @@ async function addNetwork() {
     adding.value = false;
   }
 }
-async function removeNetwork(chainId: number) {
+async function removeNetwork(chainId: number | string) {
   error.value = "";
   try {
     await api(`/platform/networks/${chainId}`, { method: "DELETE" });
@@ -198,11 +200,24 @@ async function toggleAgent() {
     </ul>
     <form class="mt-5 grid gap-4 sm:grid-cols-2" @submit.prevent="addNetwork">
       <h3 class="text-base sm:col-span-2">{{ t("settings.addNetwork") }}</h3>
+      <label class="sm:col-span-2">{{ t("settings.networkKind") }}
+        <select v-model="added.kind" class="field mt-1">
+          <option value="evm">{{ t("settings.kindEvm") }}</option>
+          <option value="starknet">Starknet</option>
+        </select>
+      </label>
+      <p v-if="added.kind === 'starknet'" class="max-w-prose text-sm text-ink-soft sm:col-span-2">{{ t("settings.starknetBody") }}</p>
       <label>{{ t("settings.networkName") }}<input v-model="added.name" class="field mt-1" required minlength="2" maxlength="80" /></label>
-      <label>{{ t("settings.chainId") }}<input v-model.number="added.chainId" type="number" min="1" class="field mt-1" required /></label>
+      <label v-if="added.kind === 'evm'">{{ t("settings.chainId") }}<input v-model.number="added.chainId" type="number" min="1" class="field mt-1" required /></label>
+      <label v-else>{{ t("settings.chainId") }}
+        <select v-model="added.chainId" class="field mt-1">
+          <option value="SN_MAIN">SN_MAIN</option>
+          <option value="SN_SEPOLIA">SN_SEPOLIA</option>
+        </select>
+      </label>
       <label>{{ t("developers.rpc") }}<input v-model="added.rpcUrl" type="url" class="field mt-1 hash" required /></label>
       <label>{{ t("developers.explorer") }}<input v-model="added.explorerUrl" type="url" class="field mt-1 hash" required /></label>
-      <label class="sm:col-span-2">{{ t("developers.registry") }}<input v-model="added.registry" class="field mt-1 hash" required pattern="0x[0-9a-fA-F]{40}" :title="t('common.walletPattern')" /></label>
+      <label class="sm:col-span-2">{{ t("developers.registry") }}<input v-model="added.registry" class="field mt-1 hash" required :pattern="added.kind === 'starknet' ? '0x[0-9a-fA-F]{1,64}' : '0x[0-9a-fA-F]{40}'" :title="t('common.walletPattern')" /></label>
       <label class="sm:col-span-2">{{ t("settings.networkLogo") }}<input type="file" accept="image/png,image/jpeg" class="field mt-1" @change="addedLogo = ($event.target as HTMLInputElement).files?.[0]" /></label>
       <div class="sm:col-span-2"><button class="btn" :disabled="adding">{{ t("settings.addNetwork") }}</button></div>
     </form>

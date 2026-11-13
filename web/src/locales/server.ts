@@ -39,6 +39,7 @@ export const serverErrors: Record<string, { zh: string; sw: string }> = {
   "Check the network details.": { zh: "请检查网络信息。", sw: "Kagua maelezo ya mtandao." },
   "Enter your institution's name.": { zh: "请输入机构名称。", sw: "Weka jina la taasisi yako." },
   "No application matches this link.": { zh: "没有与此链接匹配的申请。", sw: "Hakuna maombi yanayolingana na kiungo hiki." },
+  "That address isn't running the Legitfy registry.": { zh: "该地址运行的不是 Legitfy 登记册。", sw: "Anwani hiyo haiendeshi rejista ya Legitfy." },
   "No Legitfy registry answered at that RPC URL and address.": { zh: "该 RPC 地址和合约地址上没有响应的 Legitfy 登记册。", sw: "Hakuna rejista ya Legitfy iliyojibu kwenye RPC na anwani hiyo." },
   "Register this institution on-chain first.": { zh: "请先在链上注册此机构。", sw: "Sajili taasisi hii kwenye blockchain kwanza." },
   "Tell the applicant why.": { zh: "请告知申请人原因。", sw: "Mwambie mwombaji sababu." },

@@ -17,6 +17,7 @@ import { decryptFile, encryptFile, sha256Hex } from "./crypto.js";
 import type { Db } from "./db.js";
 import { dueAt, escalateForSla, routeAfterTriage } from "./escalation.js";
 import { evaluateSponsorship } from "./sponsorship.js";
+import { REGISTRY_CLASS_HASHES, STARKNET_CHAINS, type StarknetReader } from "./starknet.js";
 
 const MAX_FILE_BYTES = 15 * 1024 * 1024;
 const MAX_LOGO_BYTES = 1024 * 1024;
@@ -26,6 +27,8 @@ const NONCE_SECONDS = 300;
 export interface Deps {
   db: Db;
   chain: Chain;
+  /** Reads Starknet registries the platform admin lists. Leave out and Starknet can't be listed. */
+  starknet?: StarknetReader;
   triager: Triager | null;
   sessionSecret: string;
   fileMasterKey: string;
@@ -110,14 +113,27 @@ const NetworkForm = z.object({
   registry: z.string().regex(/^0x[0-9a-fA-F]{40}$/),
 });
 export type NetworkSettings = z.infer<typeof NetworkForm>;
+/** Starknet isn't EVM: its chain IDs are short strings and its addresses are up to 252 bits. */
+const StarknetNetworkForm = NetworkForm.extend({
+  kind: z.literal("starknet"),
+  chainId: z.enum(STARKNET_CHAINS),
+  registry: z.string().regex(/^0x[0-9a-fA-F]{1,64}$/),
+});
+/** Networks saved before Starknet support carry no kind, and they're all EVM. */
+const ExtraNetworkForm = z.union([StarknetNetworkForm, NetworkForm.extend({ kind: z.literal("evm").default("evm") })]);
+type ExtraNetwork = z.infer<typeof ExtraNetworkForm>;
 const MAX_EXTRA_NETWORKS = 10;
+/** Route keys: a number for EVM chains, a short string for Starknet. */
+const networkKey = (raw: string): number | string | null =>
+  /^[1-9]\d{0,15}$/.test(raw) ? Number(raw) : (STARKNET_CHAINS as readonly string[]).includes(raw) ? raw : null;
 
-/** Networks public checks also search. Issuing and sign-in stay on the main network. */
-const extraNetworks = async (db: Db): Promise<NetworkSettings[]> => {
+/** Networks public checks also search. Signing in stays on the main network. */
+const extraNetworks = async (db: Db): Promise<ExtraNetwork[]> => {
   const { rows } = await db.query<{ value: string }>("SELECT value FROM settings WHERE key = 'networks'");
-  return rows[0] ? JSON.parse(rows[0].value) : [];
+  const saved: Record<string, unknown>[] = rows[0] ? JSON.parse(rows[0].value) : [];
+  return saved.map((n) => ({ ...n, kind: n.kind === "starknet" ? "starknet" : "evm" }) as ExtraNetwork);
 };
-const saveExtraNetworks = (db: Db, networks: NetworkSettings[]) => db.query(
+const saveExtraNetworks = (db: Db, networks: ExtraNetwork[]) => db.query(
   "INSERT INTO settings (key, value) VALUES ('networks', $1) ON CONFLICT (key) DO UPDATE SET value = $1",
   [JSON.stringify(networks)],
 );
@@ -243,8 +259,9 @@ export function createApp(deps: Deps) {
     }
   };
 
+  /** Searches every listed network, because an institution may publish on any of them. */
   const statusOf = async (fileSha: string) => {
-    const match = await chain.verifyByHash(`0x${fileSha}`).catch(() => null);
+    const match = await verifyOnEveryNetwork("hash", `0x${fileSha}`).catch(() => null);
     return match?.status === "not_found" || !match ? "pending" : match.status;
   };
 
@@ -296,13 +313,19 @@ export function createApp(deps: Deps) {
 
   // ----------------------------------------------------------- public verify API
 
+  const readNetwork = (n: ExtraNetwork, by: "id" | "hash", value: Hex) => {
+    const target = { rpcUrl: n.rpcUrl, registry: n.registry };
+    if (n.kind === "evm") return chain.verify(by, value, { ...target, registry: n.registry as Address });
+    if (!deps.starknet) return Promise.reject(new Error("Starknet reading is off"));
+    return deps.starknet.verify(by, value, target);
+  };
   /** "No record" only counts if every network replied: one that didn't could hold the certificate. */
   const verifyOnEveryNetwork = async (by: "id" | "hash", value: Hex) => {
     const main = { ...deps.network, registry: deps.registry, ...(await savedNetwork(db)) };
     const others = await extraNetworks(db);
     const results = await Promise.allSettled([
       chain.verify(by, value).then((record) => ({ ...record, network: main.name })),
-      ...others.map((n) => chain.verify(by, value, { rpcUrl: n.rpcUrl, registry: n.registry as Address }).then((record) => ({ ...record, network: n.name }))),
+      ...others.map((n) => readNetwork(n, by, value).then((record) => ({ ...record, network: n.name }))),
     ]);
     const answers = results.flatMap((r) => (r.status === "fulfilled" ? [r.value] : []));
     const found = answers.find((r) => r.status !== "not_found");
@@ -339,9 +362,9 @@ export function createApp(deps: Deps) {
   });
 
   app.get("/networks/:chainId/logo", async (c) => {
-    const id = Number(c.req.param("chainId"));
-    const type = (await networkLogos(db))[String(id)];
-    if (!Number.isInteger(id) || !type) return c.json({ error: "Not found." }, 404);
+    const id = networkKey(c.req.param("chainId") ?? "");
+    const type = id === null ? undefined : (await networkLogos(db))[String(id)];
+    if (!type) return c.json({ error: "Not found." }, 404);
     return c.body(new Uint8Array(await readFile(filePath(`network-logo-${id}`))), 200, {
       "content-type": type, "cache-control": "public, max-age=300", "x-content-type-options": "nosniff",
     });
@@ -1204,13 +1227,26 @@ export function createApp(deps: Deps) {
 
   /** A network is only listed once your own registry answers there, so the list can't overstate. */
   app.post("/platform/networks", platform, async (c) => {
-    const body = NetworkForm.safeParse(await c.req.json().catch(() => null));
+    const body = ExtraNetworkForm.safeParse(await c.req.json().catch(() => null));
     if (!body.success) return c.json({ error: "Check the network details." }, 400);
     const n = body.data;
     const main = { ...deps.network, ...(await savedNetwork(db)) };
     const others = await extraNetworks(db);
     if (n.chainId === main.chainId || others.some((o) => o.chainId === n.chainId)) return c.json({ error: "That network is already listed." }, 409);
     if (others.length >= MAX_EXTRA_NETWORKS) return c.json({ error: "The network list is full." }, 409);
+    if (n.kind === "starknet") {
+      // The owner is a Starknet account, so it can't be matched to the admin's EVM wallet. The class
+      // hash proves the address runs this repo's registry, and the owner goes in the audit log.
+      const probe = deps.starknet ? await deps.starknet.probe(n).catch(() => null) : null;
+      if (!probe) return c.json({ error: "No Legitfy registry answered at that RPC URL and address." }, 422);
+      if (probe.chainId !== n.chainId) return c.json({ error: "That RPC URL is on a different chain ID." }, 422);
+      if (!REGISTRY_CLASS_HASHES.some((h) => BigInt(h) === BigInt(probe.classHash))) {
+        return c.json({ error: "That address isn't running the Legitfy registry." }, 422);
+      }
+      await saveExtraNetworks(db, [...others, n]);
+      await appendAudit(db, { requestId: null, institutionId: null, actor: "platform", action: "network.added", detail: { ...n, owner: probe.owner } });
+      return c.json(n, 201);
+    }
     const probe = await chain.probeNetwork(n.rpcUrl, n.registry as Address).catch(() => null);
     if (!probe) return c.json({ error: "No Legitfy registry answered at that RPC URL and address." }, 422);
     if (probe.chainId !== n.chainId) return c.json({ error: "That RPC URL is on a different chain ID." }, 422);
@@ -1223,7 +1259,7 @@ export function createApp(deps: Deps) {
   });
 
   app.delete("/platform/networks/:chainId", platform, async (c) => {
-    const id = Number(c.req.param("chainId"));
+    const id = networkKey(c.req.param("chainId") ?? "");
     const others = await extraNetworks(db);
     if (!others.some((n) => n.chainId === id)) return c.json({ error: "Not found." }, 404);
     await saveExtraNetworks(db, others.filter((n) => n.chainId !== id));
@@ -1232,8 +1268,8 @@ export function createApp(deps: Deps) {
   });
 
   app.post("/platform/networks/:chainId/logo", platform, uploadLimit, async (c) => {
-    const id = Number(c.req.param("chainId"));
-    if (!Number.isInteger(id) || id <= 0) return c.json({ error: "Not found." }, 404);
+    const id = networkKey(c.req.param("chainId") ?? "");
+    if (id === null) return c.json({ error: "Not found." }, 404);
     const file = (await c.req.parseBody()).file;
     if (!(file instanceof File)) return c.json({ error: "Upload the logo as a PNG or JPEG." }, 400);
     const bytes = Buffer.from(await file.arrayBuffer());

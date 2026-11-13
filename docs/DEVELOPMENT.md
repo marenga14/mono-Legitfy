@@ -7,6 +7,7 @@ How to run, deploy and maintain Legitfy. For what it is and why it exists, see t
 | Folder | What it is |
 |---|---|
 | `contracts/` | Foundry. `LegitifyRegistry` (credentials), `AuditAnchor` (daily audit roots), `LegitifyPaymaster` (gas sponsorship, not connected yet) |
+| `contracts-starknet/` | Scarb (Cairo). `LegitifyRegistry` for Starknet: same rules, statuses and IDs as the Solidity registry |
 | `api/` | Node + Hono. Applications, request desk, agent triage, escalation, audit log, encrypted files |
 | `web/` | Vue 3 + Vite + Tailwind. Public site, verifier, application flow and console, in light and dark themes |
 
@@ -15,6 +16,10 @@ How to run, deploy and maintain Legitfy. For what it is and why it exists, see t
 ```sh
 # contracts (needs Foundry)
 cd contracts && make deps && forge test
+
+# Starknet registry (needs Scarb: brew install scarb)
+cd contracts-starknet && scarb build && scarb cairo-test
+node scripts/starknet-abi.mjs   # after changing the contract: copies its ABI and class hash to api/ and web/
 
 # api: copy .env.example to .env and fill in the secrets it lists
 cd api && npm install && npm test && npm run dev
@@ -44,6 +49,17 @@ To use your own wallets, create a root `.env.local` with `LOCAL_PLATFORM_WALLET=
 Institutions apply at `/apply` with their registration document, the applicant's government ID type and number, and a wallet they prove they hold. Reviewers confirm the ID with the issuing authority. The number is stored encrypted, each view is audited, and rejecting an application erases its personal details and files. After approval, admins edit contact details directly and request changes to registered details with evidence, which the platform reviews. The on-chain name is permanent. They then download a pre-filled letter of mandate, have their head sign and seal it, and upload it from their tracking link. The platform admin reviews applications in the console, and approving registers the institution on-chain from the admin's wallet. Registered names can't be changed or deleted.
 
 After deployment, the platform admin sets the network name, chain ID, RPC URL, explorer and registry address under Settings. Saving checks that the RPC answers on that chain and that the admin owns the registry. Public pages show BOT Chain mainnet details while the app runs on a development chain.
+
+### Starknet
+
+Starknet isn't EVM, so it has its own registry in `contracts-starknet/`. Credential IDs and file hashes are the same 256-bit values as on BOT Chain, so one certificate code verifies on either network. Starknet is listed as an extra network: sign-in and the main network stay on BOT Chain.
+
+1. Deploy with Starknet Foundry's `sncast` (declare `LegitifyRegistry`, then deploy with the platform's Starknet account as `initial_owner`). Deploy the class built from this repo: the API refuses any other class hash.
+2. In the console, go to Settings, Supported networks, Add network, choose Starknet, and enter the RPC URL, the explorer (for example `https://voyager.online`) and the registry address. Saving checks the chain ID and the class hash, and writes the registry's owner to the audit log.
+3. Register institutions on the Starknet registry from the owner account with `sncast invoke ... register_institution`. Institution admins add operators with `add_operator`. These steps aren't in the console yet.
+4. Staff publish a document from Document details with Argent X or Braavos. The registry only accepts accounts that belong to an active institution, so the console asks the registry first and explains when an account isn't registered.
+
+Public checks and document status search every listed network, Starknet included. If one network doesn't answer, a check reports an error instead of "not found".
 
 ## Where files live
 

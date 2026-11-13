@@ -26,3 +26,5 @@ keystore/
 
 # api runtime data: contains encrypted documents
 .data/
+# Scarb build output
+contracts-starknet/target/

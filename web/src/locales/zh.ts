@@ -298,9 +298,10 @@ const zh: typeof en = {
     link: "需要核验多份文件？上传清单", title: "批量核验文件", body: "上传证书 ID 表格或多份 PDF。您将获得一份表格，其中包含公开记录中每一项的结果。", listTitle: "证书 ID 清单", listHint: "Excel (.xlsx) 或 CSV，最多 {max} 行。我们会自动找到 ID 列，您的其他列也会保留在结果中。", filesTitle: "PDF 文件", filesHint: "最多 {max} 个文件。请使用加盖印章的副本。", privacy: "所有操作都在您的浏览器中完成，您的清单和文件绝不会被上传。", progress: "已核验 {done} / {total}", download: "下载结果 (Excel)", notFake: "无记录并不代表文件是伪造的：较早的文件和重新保存的副本都无法匹配，请询问机构。未核验表示无法连接公开记录，请重试。", item: "项目", result: "结果", issuedBy: "签发机构", issued: "签发日期", network: "网络", currentVersion: "当前版本 ID", fileName: "文件", unreadable: "无法读取该文件。请另存为 .xlsx 或 .csv 后重试。", noRows: "该文件中没有找到任何行。", tooManyRows: "行数过多，上限为 {max}。", tooManyFiles: "文件过多，上限为 {max}。",
     status: { authentic: "已在公开记录中", revoked: "已撤销", replaced: "已被替换", suspended: "签发机构已暂停", not_found: "未找到记录", invalid: "ID 有误", not_checked: "未核验" },
   },
+  starknet: { publish: "用 {wallet} 发布到 {network}", noWallet: "要发布到 {network}，请安装 Argent X 或 Braavos 等 Starknet 钱包，然后重新加载本页。", wrongChain: "请将你的 Starknet 钱包切换到 {network}，然后重试。", notMember: "Starknet 账户 {account} 目前还不能在此网络上代表机构发布。请联系平台管理员为其注册。" },
   settings: {
     currentLogo: "当前徽标", newLogo: "新徽标",
-    networksTitle: "支持的网络", networksBody: "公开核验会搜索此处的每个网络。只有在您的登记册部署到某网络后，才能添加该网络。", networkLogo: "网络徽标（PNG 或 JPEG，不超过 1 MB）", addNetwork: "添加网络", removeNetwork: "移除",
+    networkKind: "网络类型", kindEvm: "EVM（BOT Chain、Base 等）", starknetBody: "Starknet 使用一份用 Cairo 编写的独立登记合约。添加时会检查该地址是否在你选择的链上运行 Legitfy 登记合约。机构需要用 Starknet 账户在其中另行注册。", networksTitle: "支持的网络", networksBody: "公开核验会搜索此处的每个网络。只有在您的登记册部署到某网络后，才能添加该网络。", networkLogo: "网络徽标（PNG 或 JPEG，不超过 1 MB）", addNetwork: "添加网络", removeNetwork: "移除",
     listingTitle: "公开展示", listingBody: "开启后，贵机构的名称、所在地和徽标会显示在 Legitfy 首页。您可以随时关闭。", logo: "徽标（PNG 或 JPEG，不超过 1 MB）", uploadLogo: "上传徽标", replaceLogo: "更换徽标", showListing: "在首页显示", hideListing: "从首页隐藏",
     networkTitle: "网络信息", networkBody: "这些信息显示在公开网站上，并决定网站读取哪个网络。部署后请在此更新。保存时会检查 RPC 地址是否可用，以及您的钱包是否拥有该登记册。", networkName: "网络名称", chainId: "链 ID", saveNetwork: "保存网络信息",
     title: "设置", role: "角色", network: "网络", institution: "机构", level: "审核级别", account: "账户", roles: { platform: "平台管理员", admin: "机构管理员", operator: "操作员" },
